@@ -23,6 +23,11 @@ classifiers = [
     "Topic :: System :: Hardware",
 ]
 
+[project.urls]
+Homepage = "https://surak.github.io/brickremote/"
+Source = "https://github.com/surak/brickremote"
+Changelog = "https://github.com/surak/brickremote/blob/main/CHANGELOG.md"
+
 [project.optional-dependencies]
 web = ["aiohttp>=3.9"]
 test = ["pytest"]
