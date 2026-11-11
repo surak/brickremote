@@ -6,6 +6,7 @@ import asyncio
 import contextlib
 import logging
 import shutil
+import subprocess
 from collections.abc import Callable, Iterable
 
 from bleak import BleakClient, BleakScanner
@@ -144,6 +145,50 @@ class JMCModule:
                     await self.stop()
                 await self._client.disconnect()
             self._client = None
+
+    async def keep_connected(self, *, on_connected: Callable[[], None] | None = None,
+                             on_lost: Callable[[], None] | None = None,
+                             on_error: Callable[[Exception], None] | None = None,
+                             retry: float = 1.0, poll: float = 0.5) -> None:
+        """Connect, and reconnect whenever the connection drops (e.g. the module switched itself off).
+
+        Runs until cancelled. `on_lost` is called before each connection attempt, `on_error` when
+        an attempt fails, and `on_connected` when it succeeds.
+        """
+        while True:
+            if not self.is_connected:
+                if on_lost:
+                    on_lost()
+                try:
+                    await self.disconnect()  # clean up a dropped connection
+                    await self.connect()
+                except Exception as exc:
+                    log.debug("connect failed: %s", exc)
+                    if on_error:
+                        on_error(exc)
+                    await asyncio.sleep(retry)
+                    continue
+                if on_connected:
+                    on_connected()
+            await asyncio.sleep(poll)
+
+    async def close(self, *, fast: bool = True) -> None:
+        """Stop the motors and disconnect.
+
+        With `fast` (on Linux with BlueZ) this returns at once and BlueZ finishes closing the link
+        in the background, so an app can exit without waiting a couple of seconds.
+        """
+        if not self.is_connected:
+            return
+        with contextlib.suppress(Exception):
+            await asyncio.wait_for(self.stop(), 0.5)
+        command = self.detach() if fast else None
+        if command:
+            subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
+            return
+        with contextlib.suppress(Exception):
+            await asyncio.wait_for(self.disconnect(), 5)
 
     async def __aenter__(self) -> JMCModule:
         await self.connect()

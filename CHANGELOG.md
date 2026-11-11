@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- `JMCModule.keep_connected()` and `JMCModule.close()`: the reconnect loop and the instant quit used
+  by both apps now live in the library.
+- Settings handling moved to `brickremote.config`.
+- Tests for the module (with a fake Bluetooth client), the web server and the terminal app's controls.
+- Python 3.10 or newer is required.
+
 ## 0.3.0
 
 - Renamed from `jmcble` to `brickremote` (package, command and config file; old settings are picked up).

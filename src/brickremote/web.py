@@ -21,7 +21,7 @@ from .car import Car
 from .module import JMCModule
 from .protocol import PORTS
 from .script import Calibration, ScriptError, parse_path, parse_program, run_path, run_program
-from .tui import EXAMPLE_PATH, EXAMPLE_PROGRAM, load_config, save_config
+from .config import EXAMPLE_PATH, EXAMPLE_PROGRAM, load_config, save_config
 
 log = logging.getLogger(__name__)
 
@@ -146,24 +146,13 @@ class Remote:
                 with contextlib.suppress(Exception):
                     await self.module.stop()
 
-    async def keep_connected(self) -> None:
-        while True:
-            if not self.module.is_connected:
-                self.cancel()
-                try:
-                    await self.module.disconnect()
-                    await self.module.connect()
-                    self.say("Connected! Let's go!")
-                except Exception as exc:
-                    log.debug("connect failed: %s", exc)
-                    await asyncio.sleep(1)
-                    continue
-            await asyncio.sleep(0.5)
-
     async def ticker(self) -> None:
         while True:
             await self.broadcast()
             await asyncio.sleep(0.2)
+
+
+REMOTE = web.AppKey("remote", Remote)
 
 
 async def index(request: web.Request) -> web.Response:
@@ -172,7 +161,7 @@ async def index(request: web.Request) -> web.Response:
 
 
 async def websocket(request: web.Request) -> web.WebSocketResponse:
-    remote: Remote = request.app["remote"]
+    remote = request.app[REMOTE]
     ws = web.WebSocketResponse(heartbeat=5)
     await ws.prepare(request)
     remote.clients.add(ws)
@@ -202,12 +191,17 @@ def local_addresses() -> list[str]:
     return sorted(addresses)
 
 
-async def serve(module: JMCModule, car: Car, host: str, port: int) -> None:
-    remote = Remote(module, car)
+def make_app(remote: Remote) -> web.Application:
     app = web.Application()
-    app["remote"] = remote
+    app[REMOTE] = remote
     app.router.add_get("/", index)
     app.router.add_get("/ws", websocket)
+    return app
+
+
+async def serve(module: JMCModule, car: Car, host: str, port: int) -> None:
+    remote = Remote(module, car)
+    app = make_app(remote)
     runner = web.AppRunner(app, access_log=None)
     await runner.setup()
     await web.TCPSite(runner, host, port).start()
@@ -217,21 +211,15 @@ async def serve(module: JMCModule, car: Car, host: str, port: int) -> None:
         for addr in local_addresses():
             print(f"  http://{addr}:{port}  (from a tablet or another computer)")
     print("Press Ctrl-C to stop.", flush=True)
-    tasks = [asyncio.create_task(t) for t in (remote.keep_connected(), remote.deadman(), remote.ticker())]
+    connector = module.keep_connected(on_lost=remote.cancel, on_connected=lambda: remote.say("Connected! Let's go!"))
+    tasks = [asyncio.create_task(t) for t in (connector, remote.deadman(), remote.ticker())]
     try:
         await asyncio.Event().wait()
     finally:
         for t in tasks:
             t.cancel()
         remote.cancel()
-        if module.is_connected:
-            with contextlib.suppress(Exception):
-                await asyncio.wait_for(module.stop(), 0.5)
-            command = module.detach()
-            if command:
-                import subprocess
-                subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                 stderr=subprocess.DEVNULL, start_new_session=True)
+        await module.close()
         await runner.cleanup()
 
 

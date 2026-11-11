@@ -11,11 +11,9 @@ from __future__ import annotations
 import asyncio
 import curses
 import functools
-import json
 import math
 import os
 import subprocess
-import sys
 import tempfile
 import logging
 import time
@@ -23,6 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .car import Car
+from .config import EXAMPLE_PATH, EXAMPLE_PROGRAM, load_config, save_config
 from .module import JMCModule
 from .protocol import GEARS
 from .script import Calibration, ScriptError, parse_path, parse_program, run_path, run_program
@@ -31,7 +30,6 @@ log = logging.getLogger(__name__)
 
 TABS = ("Car", "Ports", "Program", "Path")
 TAB_ICONS = ("◉", "✚", "≡", "⌁")
-CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "brickremote.json"
 
 # Release detection: before auto-repeat kicks in (~0.5 s after the first press) we must wait;
 # once a key is repeating, a short gap in the repeats means it was let go.
@@ -43,23 +41,6 @@ REPEAT_HOLD = 0.15
 PORT_KEYS = {"a": ("w", "s"), "b": ("d", "a"), "c": ("i", "k"), "d": ("l", "j")}
 LINKS = (None, ("a", "b"), ("a", "c"))
 
-EXAMPLE_PROGRAM = """# Program mode - see `brickremote program --help` for all commands
-gear 2
-repeat 2
-  a + 1.5
-  wait 0.5
-  a - 1.5
-end
-stop
-"""
-EXAMPLE_PATH = """# Path mode - metres and degrees
-forward 1
-left 90
-forward 0.5
-right 90
-back 0.5
-"""
-
 BIG_DIGITS = {
     1: (" ██ ", "███ ", " ██ ", " ██ ", "████"),
     2: ("███ ", "   █", " ██ ", "█   ", "████"),
@@ -68,23 +49,6 @@ BIG_DIGITS = {
 
 # colour pair numbers
 GREEN, ON_GREEN, DIM, YELLOW, RED, BLUE, ON_YELLOW, ON_RED, WHITE, ORANGE = range(1, 11)
-
-
-def load_config() -> dict:
-    for path in (CONFIG, CONFIG.with_name("jmcble.json")):  # the package was called jmcble before 0.3
-        try:
-            return json.loads(path.read_text())
-        except (OSError, ValueError):
-            continue
-    return {}
-
-
-def save_config(cfg: dict) -> None:
-    try:
-        CONFIG.parent.mkdir(parents=True, exist_ok=True)
-        CONFIG.write_text(json.dumps(cfg, indent=2))
-    except OSError:
-        pass
 
 
 def init_colours() -> None:
@@ -245,7 +209,7 @@ class App:
                 return
 
     def key(self, k: int) -> None:
-        log.debug("key %r on %s", curses.keyname(k) if k >= 0 else k, TABS[self.tab])
+        log.debug("key %r on %s", k, TABS[self.tab])
         ch = chr(k).lower() if 0 <= k < 256 else ""
         raw = chr(k) if 0 <= k < 256 else ""
         now = time.monotonic()
@@ -558,22 +522,16 @@ class App:
         self.hit(h - 1, 1, 1, 8, lambda: self.key(ord("q")))
         self.put(h - 1, 4, " quit", bar)
 
-    async def keep_connected(self) -> None:
-        """Connect, and reconnect whenever the module goes away (e.g. it switched itself off)."""
-        while not self.quit:
-            if not self.module.is_connected:
-                self.held.clear()
-                self.cancel()
-                try:
-                    await self.module.disconnect()  # clean up a dropped connection
-                    await self.module.connect()
-                    self.connect_error = ""
-                    self.say("Connected! Let's go!")
-                except Exception as exc:
-                    self.connect_error = "" if isinstance(exc, ConnectionError) else f"({exc})"
-                    await asyncio.sleep(1)
-                    continue
-            await asyncio.sleep(0.5)
+    def _lost(self) -> None:
+        self.held.clear()
+        self.cancel()
+
+    def _connected(self) -> None:
+        self.connect_error = ""
+        self.say("Connected! Let's go!")
+
+    def _connect_failed(self, exc: Exception) -> None:
+        self.connect_error = "" if isinstance(exc, ConnectionError) else f"({exc})"
 
     def draw(self) -> None:
         self.scr.erase()
@@ -612,7 +570,8 @@ class App:
         curses.mouseinterval(0)  # report press and release separately, without click delay
         curses.curs_set(0)
         init_colours()
-        connector = asyncio.create_task(self.keep_connected())
+        connector = asyncio.create_task(self.module.keep_connected(
+            on_connected=self._connected, on_lost=self._lost, on_error=self._connect_failed))
         try:
             while not self.quit:
                 while (k := self.scr.getch()) != -1:
@@ -630,26 +589,7 @@ class App:
         finally:
             self.cancel()
             connector.cancel()
-            await self.shutdown()
-
-    async def shutdown(self) -> None:
-        """Stop the motors and exit at once; BlueZ finishes the disconnect in the background."""
-        if not self.module.is_connected:
-            return
-        try:
-            await asyncio.wait_for(self.module.stop(), 0.5)
-        except Exception:
-            pass
-        command = self.module.detach()
-        if command:
-            subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL, start_new_session=True)
-            return
-        try:
-            await asyncio.wait_for(self.module.disconnect(), 5)
-        except Exception:
-            pass
-
+            await self.module.close()
 
 async def _main(scr, address, drive_port, steer_port) -> None:
     module = JMCModule(address, timeout=5.0)
