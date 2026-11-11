@@ -8,7 +8,8 @@ four motor ports A–D). Works anywhere [bleak](https://github.com/hbldh/bleak) 
 (incl. Raspberry Pi), macOS and Windows.
 
 ```
-pip install brickremote
+pip install brickremote          # library and terminal app
+pip install "brickremote[web]"     # plus the web remote control
 ```
 
 Or from a checkout, without installing anything yourself:
