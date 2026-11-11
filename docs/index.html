@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brick Remote</title>
+<meta name="description" content="Drive your Bluetooth building-block car from a computer or tablet. Free and open source.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffaf0; --ink: #1d1d1f; --soft: #5b5b66; --card: #ffffff; --line: #ece4d4;
+  --red: #ff4b4b; --yellow: #ffd23f; --green: #7cc41a; --blue: #2f9bff; --orange: #ff8c1a; --purple: #8a5cff;
+  --shadow: 0 8px 0 rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141414; --ink: #f4f4f4; --soft: #b4b4bd; --card: #1f1f1f; --line: #2c2c2c; --shadow: 0 8px 0 rgba(0,0,0,.4); }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Fredoka", ui-rounded, system-ui, sans-serif; font-size: 19px; line-height: 1.55; }
+a { color: var(--blue); }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* studs row used as a decoration */
+.studs { display: flex; gap: 10px; }
+.studs i { width: 34px; height: 20px; border-radius: 8px 8px 3px 3px; display: block; }
+.studs i:nth-child(1) { background: var(--red); } .studs i:nth-child(2) { background: var(--yellow); }
+.studs i:nth-child(3) { background: var(--green); } .studs i:nth-child(4) { background: var(--blue); }
+
+/* hero */
+.hero { padding: 48px 0 30px; text-align: center; }
+.hero .studs { justify-content: center; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(42px, 8vw, 84px); line-height: 1; margin: 0 0 14px; font-weight: 700; letter-spacing: -1px; }
+.hero h1 span { color: var(--green); }
+.hero p.lead { font-size: clamp(20px, 2.6vw, 27px); color: var(--soft); max-width: 720px; margin: 0 auto 26px; }
+.btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 14px 26px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 20px;
+  box-shadow: var(--shadow); transition: transform .1s; }
+.btn:hover { transform: translateY(-3px); }
+.btn.go { background: var(--green); color: #111; } .btn.alt { background: var(--card); color: var(--ink); border: 3px solid var(--line); }
+.screen { margin: 36px auto 0; max-width: 940px; border-radius: 24px; overflow: hidden; border: 10px solid #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(-1deg); }
+
+/* sections */
+section { padding: 46px 0; }
+h2 { font-size: clamp(32px, 5vw, 48px); margin: 0 0 8px; line-height: 1.1; }
+h2 .emoji { display: inline-block; transform: rotate(-8deg); }
+.sub { color: var(--soft); font-size: 21px; margin: 0 0 28px; }
+
+/* need list */
+.need { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+.tile { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 22px; box-shadow: var(--shadow); }
+.tile .big { font-size: 46px; line-height: 1; }
+.tile h3 { margin: 10px 0 4px; font-size: 24px; }
+.tile p { margin: 0; color: var(--soft); }
+
+/* steps */
+.steps { display: grid; gap: 18px; counter-reset: step; }
+.step { display: grid; grid-template-columns: 74px 1fr; gap: 18px; align-items: start; background: var(--card);
+  border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.step::before { counter-increment: step; content: counter(step); width: 74px; height: 74px; border-radius: 20px; display: grid; place-items: center;
+  font-size: 40px; font-weight: 700; color: #111; }
+.step:nth-child(1)::before { background: var(--red); } .step:nth-child(2)::before { background: var(--yellow); }
+.step:nth-child(3)::before { background: var(--green); } .step:nth-child(4)::before { background: var(--blue); }
+.step h3 { margin: 4px 0 6px; font-size: 25px; }
+.step p { margin: 0 0 8px; color: var(--soft); }
+.grownup { display: inline-block; background: var(--purple); color: #fff; font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
+pre, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+pre { background: #111; color: #e8ffd0; padding: 14px 16px; border-radius: 16px; overflow-x: auto; font-size: 16px; margin: 8px 0; position: relative; }
+pre .c { color: #8a8a8a; }
+.copy { position: absolute; right: 10px; top: 10px; background: var(--green); color: #111; border: 0; border-radius: 10px; font: 700 14px "Fredoka", sans-serif;
+  padding: 4px 10px; cursor: pointer; }
+
+/* modes */
+.mode { display: grid; grid-template-columns: 1.1fr 1fr; gap: 30px; align-items: center; margin: 0 0 46px; }
+.mode:nth-child(even) .pic { order: 2; }
+.mode .pic img { border-radius: 18px; border: 6px solid #111; box-shadow: 0 16px 40px rgba(0,0,0,.2); }
+.mode h3 { font-size: 34px; margin: 0 0 8px; }
+.mode .tag { display: inline-block; padding: 4px 14px; border-radius: 999px; color: #111; font-weight: 700; margin-bottom: 10px; }
+.mode p { color: var(--soft); margin: 0 0 10px; }
+.mode ul { margin: 0; padding-left: 22px; color: var(--soft); }
+
+/* programs */
+.progs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.prog { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.prog h3 { margin: 0 0 4px; font-size: 24px; }
+.prog p { margin: 0 0 6px; color: var(--soft); }
+
+/* keys */
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.key { display: flex; align-items: center; gap: 14px; background: var(--card); border: 3px solid var(--line); border-radius: 18px; padding: 12px 16px; }
+kbd { display: inline-grid; place-items: center; min-width: 44px; height: 44px; padding: 0 10px; border-radius: 10px; background: #fff; color: #111;
+  border: 2px solid #ccc; border-bottom-width: 5px; font: 700 18px "Fredoka", sans-serif; }
+
+/* safety */
+.safety { background: var(--red); color: #fff; border-radius: 30px; padding: 28px; display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+.safety .stop { width: 110px; height: 110px; background: #fff; color: var(--red); border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 28px; box-shadow: 0 8px 0 rgba(0,0,0,.2); }
+.safety h2 { color: #fff; } .safety p { margin: 0; font-size: 21px; }
+
+/* grown-ups */
+.grownups { background: var(--card); border: 3px solid var(--line); border-radius: 30px; padding: 30px; }
+.grownups h3 { margin: 18px 0 6px; }
+.grownups p, .grownups li { color: var(--soft); }
+
+footer { padding: 40px 0 60px; text-align: center; color: var(--soft); }
+footer .studs { justify-content: center; margin-bottom: 12px; }
+
+@media (max-width: 760px) {
+  .mode { grid-template-columns: 1fr; } .mode:nth-child(even) .pic { order: 0; }
+  .safety { grid-template-columns: 1fr; text-align: center; } .safety .stop { margin: 0 auto; }
+  .step { grid-template-columns: 1fr; } .step::before { width: 60px; height: 60px; font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <h1>Brick <span>Remote</span></h1>
+    <p class="lead">Drive your building-block car with a computer or a tablet. Steer it, race it, teach it to dance, or draw a road for it to follow!</p>
+    <div class="btns">
+      <a class="btn go" href="#start">🚀 Let's start</a>
+      <a class="btn alt" href="#play">🎮 What can it do?</a>
+    </div>
+    <div class="screen"><img src="img/car.jpg" alt="The Brick Remote app with a big green steering wheel, forward and back buttons, and speed 1, 2, 3" width="1280" height="800"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🧰</span> What you need</h2>
+    <p class="sub">Just three things.</p>
+    <div class="need">
+      <div class="tile"><div class="big">🧱</div><h3>Your motor brick</h3><p>The battery box with motor plugs A, B, C and D. It usually comes with the <b>XP Block</b> app and says "Smart creative module" in the leaflet.</p></div>
+      <div class="tile"><div class="big">💻</div><h3>A computer</h3><p>With Bluetooth: a Raspberry Pi, a laptop or a desktop. A tablet or phone can be the remote too.</p></div>
+      <div class="tile"><div class="big">🧑‍🔧</div><h3>A grown-up</h3><p>Just for the first setup. After that, you're the driver!</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2><span class="emoji">🚀</span> Get going in 4 steps</h2>
+    <p class="sub">Steps 1 and 2 only happen once.</p>
+    <div class="steps">
+      <div class="step"><div>
+        <h3>Get Brick Remote <span class="grownup">grown-up</span></h3>
+        <p>Install it with Python:</p>
+        <pre><button class="copy">copy</button>pip install "brickremote[web]"</pre>
+        <p>Or download the code and use <code>./run.sh</code>, which sets everything up by itself the first time.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Build your car</h3>
+        <p>Plug the driving motor into port <b>A</b> and the steering motor into port <b>D</b>. That's how the ready-made car in the box is built.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Switch on your brick</h3>
+        <p>Press the power button. The light starts blinking: it's waiting for you!</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Start the remote</h3>
+        <pre><button class="copy">copy</button>brickremote web</pre>
+        <p>Open the address it shows in a web browser. On a tablet, use the one that ends in <code>:8080</code>. When the brick is found, the light stops blinking and you can drive!</p>
+        <p>Like typing more than clicking? Just run <code>brickremote</code> for the keyboard version.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section id="play">
+  <div class="wrap">
+    <h2><span class="emoji">🎮</span> Four ways to play</h2>
+    <p class="sub">Switch between them with the buttons at the top.</p>
+
+    <div class="mode">
+      <div class="pic"><img src="img/car.jpg" alt="Car screen with steering wheel" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--green)">🚗 Car</span>
+        <h3>Be the driver</h3>
+        <p>Hold <b>FORWARD</b> to go, and turn the steering wheel. Let go and the wheel springs back to the middle, just like a real car.</p>
+        <ul><li>Pick speed <b>1</b> (slow), <b>2</b> or <b>3</b> (zoom!)</li><li>Or use the arrow keys</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/ports.jpg" alt="Ports screen with two joysticks" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--blue)">🕹️ Ports</span>
+        <h3>Control every motor</h3>
+        <p>Built a crane, a robot or a tank? Two joysticks control all four motors, one for A and B, one for C and D.</p>
+        <ul><li><b>Pair</b> makes two motors move together, great for tanks</li><li><b>Reverse</b> fixes a motor that turns the wrong way</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/program.jpg" alt="Program screen with blocks" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--orange)">🧩 Program</span>
+        <h3>Teach it a trick</h3>
+        <p>Tap the coloured blocks to build a list of moves, then press <b>RUN</b> and watch your creation do it all by itself.</p>
+        <ul><li>Blue blocks move motors</li><li>Orange blocks wait and repeat</li><li>Green blocks change speed</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/path.jpg" alt="Path screen with a grid and a route" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--yellow)">🗺️ Path</span>
+        <h3>Draw a road</h3>
+        <p>Tap squares on the grid to draw where the car should go. Each square is half a metre. Press <b>GO!</b> and off it drives.</p>
+        <ul><li>Measure your car once, then set the speed and turning sliders for perfect paths</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">💃</span> Programs to try</h2>
+    <p class="sub">Copy one into the Program screen and press RUN. Then change the numbers and see what happens!</p>
+    <div class="progs">
+      <div class="prog"><h3>🐛 The wiggle</h3><p>Forward and back, again and again.</p>
+<pre><button class="copy">copy</button>gear 2
+repeat 4
+  a + 0.5
+  a - 0.5
+end</pre></div>
+      <div class="prog"><h3>🌀 Spinning dance</h3><p>Steer hard and drive in circles.</p>
+<pre><button class="copy">copy</button>repeat 3
+  d +     <span class="c"># steer left and keep it there</span>
+  a + 2   <span class="c"># drive for 2 seconds</span>
+  stop
+  wait 0.5
+end</pre></div>
+      <div class="prog"><h3>🐢🐇 Slow, then fast</h3><p>The tortoise and the hare.</p>
+<pre><button class="copy">copy</button>gear 1
+a + 2
+gear 3
+a + 1
+stop</pre></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">⌨️</span> Keyboard keys</h2>
+    <p class="sub">For the keyboard version (<code>brickremote</code>). Most of them work in the web version too.</p>
+    <div class="keys">
+      <div class="key"><kbd>↑</kbd><kbd>↓</kbd> drive forward / back</div>
+      <div class="key"><kbd>←</kbd><kbd>→</kbd> steer left / right</div>
+      <div class="key"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> speed</div>
+      <div class="key"><kbd>Tab</kbd> next screen</div>
+      <div class="key"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> ports A and B</div>
+      <div class="key"><kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> ports C and D</div>
+      <div class="key"><kbd>space</kbd> STOP everything</div>
+      <div class="key"><kbd>Q</kbd> quit</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="safety">
+      <div class="stop">STOP</div>
+      <div>
+        <h2>Safety first!</h2>
+        <p>The big red <b>STOP</b> button (or the space bar) stops every motor straight away. Drive on the floor, not on the table, and keep fingers away from turning wheels and gears.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="grownups">
+  <div class="wrap">
+    <div class="grownups">
+      <h2><span class="emoji">🧑‍🔧</span> For grown-ups</h2>
+      <p>Brick Remote is free, open-source software (MIT licence). It works with the low-cost Bluetooth LE motor modules that advertise as <code>JG_JMC-xxxx</code> and are normally used with the XP Block phone app. It runs on Linux (including Raspberry Pi), macOS and Windows.</p>
+      <h3>More than an app</h3>
+      <p>It is also a small Python library, if you want to build your own projects:</p>
+<pre><button class="copy">copy</button>import asyncio
+from brickremote import JMCModule
+
+async def main():
+    async with JMCModule() as m:
+        await m.run(2, a=255)   <span class="c"># port A forward for 2 seconds</span>
+
+asyncio.run(main())</pre>
+      <h3>Good to know</h3>
+      <ul>
+        <li>The brick switches itself off after about ten minutes without commands.</li>
+        <li>Ports A and B share one speed setting, and so do C and D.</li>
+        <li>The web remote stops the motors by itself if the browser goes away (closed tab, lost Wi-Fi).</li>
+        <li>This is an independent project. It is not made by, or connected to, the makers of the XP Block app or the bricks.</li>
+      </ul>
+      <p>Code, protocol notes and the full command reference are in the <a href="https://github.com/">project on GitHub</a>.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  Brick Remote · free and open source · made for curious builders
+</footer>
+
+<script>
+document.querySelectorAll(".copy").forEach(btn => btn.addEventListener("click", () => {
+  const text = [...btn.parentElement.childNodes].filter(n => n !== btn).map(n => n.textContent).join("")
+    .split("\n").map(l => l.replace(/\s+#.*$/, "")).join("\n").trim();
+  navigator.clipboard.writeText(text).then(() => { btn.textContent = "copied!"; setTimeout(() => btn.textContent = "copy", 1500); });
+}));
+</script>
+</body>
+</html>

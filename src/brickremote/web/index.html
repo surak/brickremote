@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#111">
+<title>Brick Remote</title>
+<style>
+:root {
+  --bg: #121212; --panel: #1d1d1d; --panel2: #262626; --line: #333;
+  --text: #f4f4f4; --dim: #9a9a9a;
+  --green: #8ed11f; --green-dark: #5f9410; --orange: #ff8c1a; --red: #ff4b4b;
+  --yellow: #ffd23f; --blue: #3fa9ff;
+  --radius: 22px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+  font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", system-ui, sans-serif; }
+body { display: flex; flex-direction: column; user-select: none; -webkit-user-select: none; overflow: hidden; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; }
+
+/* header */
+header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: #0b0b0b;
+  border-bottom: 3px solid var(--green); flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 22px; letter-spacing: .5px; }
+.logo svg { width: 46px; height: 32px; }
+nav { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; }
+nav button { background: var(--panel2); padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 17px;
+  color: var(--dim); transition: transform .1s, background .2s; }
+nav button.on { background: var(--green); color: #111; transform: scale(1.06); }
+.battery { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.battery .cell { width: 44px; height: 22px; border: 3px solid currentColor; border-radius: 6px; padding: 2px; position: relative; }
+.battery .cell::after { content: ""; position: absolute; right: -7px; top: 5px; width: 4px; height: 8px; background: currentColor; border-radius: 0 2px 2px 0; }
+.battery .fill { height: 100%; border-radius: 2px; background: currentColor; width: 0; }
+
+/* layout */
+main { flex: 1; position: relative; overflow: auto; }
+section { display: none; height: 100%; padding: 18px; }
+section.on { display: block; }
+.row { display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; height: 100%; }
+.col { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.panel { background: var(--panel); border-radius: var(--radius); padding: 16px; }
+.label { font-weight: 900; letter-spacing: 1px; font-size: 15px; color: var(--dim); text-transform: uppercase; }
+
+/* big buttons */
+.big { width: 128px; height: 108px; border-radius: 28px; background: var(--panel2); font-size: 46px; font-weight: 900;
+  box-shadow: 0 7px 0 #0a0a0a, inset 0 0 0 4px var(--green); color: var(--green);
+  transition: transform .06s, box-shadow .06s, background .1s; touch-action: none; }
+.big.orange { box-shadow: 0 7px 0 #0a0a0a, inset 0 0 0 4px var(--orange); color: var(--orange); }
+.big.down { transform: translateY(6px); box-shadow: 0 1px 0 #0a0a0a, inset 0 0 0 4px var(--green); background: var(--green); color: #111; }
+.big.orange.down { background: var(--orange); box-shadow: 0 1px 0 #0a0a0a, inset 0 0 0 4px var(--orange); }
+.big small { display: block; font-size: 14px; letter-spacing: 1px; }
+
+/* gears */
+.gears { display: flex; flex-direction: column; gap: 10px; }
+.gears button { width: 74px; height: 64px; border-radius: 18px; background: var(--panel2); font-size: 34px; font-weight: 900; color: var(--dim);
+  box-shadow: 0 5px 0 #0a0a0a; }
+.gears button.on { background: var(--green); color: #111; }
+
+/* steering wheel */
+.wheel { width: min(46vh, 380px); aspect-ratio: 1; touch-action: none; cursor: grab;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.6)); }
+.wheel:active { cursor: grabbing; }
+.wheel g { transition: transform .05s linear; transform-origin: 100px 100px; }
+.steer-label { font-weight: 900; font-size: 22px; letter-spacing: 2px; height: 28px; }
+
+/* meters */
+.meter { width: 220px; height: 22px; border-radius: 11px; background: var(--panel2); overflow: hidden; position: relative; }
+.meter .bar { position: absolute; top: 0; bottom: 0; left: 50%; background: var(--green); transition: all .15s; }
+.meter .mid { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #555; }
+.meter-row { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+.meter-row .tag { color: var(--yellow); font-size: 13px; min-width: 80px; }
+
+/* joysticks */
+.stick { width: min(38vh, 300px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #2a2a2a 0 55%, #1b1b1b 56%);
+  border: 4px solid var(--green); position: relative; touch-action: none; }
+.stick .knob { position: absolute; width: 34%; height: 34%; left: 33%; top: 33%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #bdf35a, var(--green-dark)); box-shadow: 0 6px 14px rgba(0,0,0,.6); }
+.stick .lab { position: absolute; font-weight: 900; font-size: 22px; color: var(--green); }
+.stick .n { top: 6px; left: 50%; transform: translateX(-50%); } .stick .s { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.stick .w { left: 10px; top: 50%; transform: translateY(-50%); } .stick .e { right: 10px; top: 50%; transform: translateY(-50%); }
+
+/* toggles */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.chip { padding: 10px 16px; border-radius: 999px; background: var(--panel2); font-weight: 800; color: var(--dim); }
+.chip.on { background: var(--yellow); color: #111; }
+
+/* program */
+.editor-wrap { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(220px, 300px); gap: 18px; max-width: 1000px; margin: 0 auto; }
+textarea { width: 100%; min-height: 300px; background: #0d0d0d; color: var(--text); border: 3px solid var(--green); border-radius: 18px;
+  padding: 14px; font: 18px/1.5 ui-monospace, "SF Mono", Menlo, monospace; resize: vertical; user-select: text; -webkit-user-select: text; }
+.blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.block { padding: 12px 8px; border-radius: 14px; font-weight: 800; color: #111; box-shadow: 0 4px 0 rgba(0,0,0,.5); }
+.block.motion { background: var(--blue); } .block.control { background: var(--orange); } .block.speed { background: var(--green); }
+.actions { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.action { flex: 1; padding: 16px; border-radius: 18px; font-size: 20px; font-weight: 900; box-shadow: 0 5px 0 #0a0a0a; }
+.action.run { background: var(--green); color: #111; } .action.edit { background: var(--panel2); }
+.action.stop { background: var(--red); color: #fff; }
+
+/* path */
+.path-wrap { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(220px, 300px); gap: 18px; max-width: 1100px; margin: 0 auto; }
+canvas { width: 100%; background: var(--green); border-radius: 18px; touch-action: none; display: block; cursor: crosshair; }
+.slider { display: block; font-weight: 800; margin: 6px 0; }
+input[type=range] { width: 100%; accent-color: var(--green); }
+
+/* footer */
+footer { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: #0b0b0b; border-top: 3px solid var(--green); }
+.stopall { background: var(--red); color: #fff; font-weight: 900; font-size: 22px; padding: 12px 34px; border-radius: 999px;
+  box-shadow: 0 5px 0 #6b0000; letter-spacing: 2px; }
+.stopall:active { transform: translateY(4px); box-shadow: 0 1px 0 #6b0000; }
+.msg { flex: 1; font-weight: 800; color: var(--yellow); font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hint { color: var(--dim); font-size: 14px; }
+
+/* searching overlay */
+.overlay { position: fixed; inset: 0; background: rgba(10,10,10,.94); display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 22px; z-index: 10; text-align: center; padding: 20px; }
+.overlay.hidden { display: none; }
+.overlay h1 { margin: 0; font-size: clamp(28px, 5vw, 46px); color: var(--yellow); }
+.overlay p { margin: 0; font-size: 20px; color: var(--dim); }
+.brick { display: flex; gap: 10px; padding: 0 14px 0; position: relative; }
+.brick::after { content: ""; position: absolute; left: 0; right: 0; bottom: -54px; height: 64px; background: var(--green); border-radius: 10px; }
+.stud { width: 52px; height: 30px; border-radius: 10px 10px 4px 4px; animation: hop 1.2s infinite ease-in-out; }
+.stud:nth-child(2) { animation-delay: .15s; } .stud:nth-child(3) { animation-delay: .3s; } .stud:nth-child(4) { animation-delay: .45s; }
+@keyframes hop { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-16px); } }
+
+@media (max-width: 720px) {
+  .editor-wrap, .path-wrap { grid-template-columns: 1fr; }
+  .big { width: 96px; height: 84px; font-size: 36px; }
+  .logo span { display: none; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 46 32" aria-hidden="true">
+      <rect x="1" y="12" width="44" height="19" rx="4" fill="#8ed11f"/>
+      <rect x="3" y="4" width="8" height="9" rx="2" fill="#ff4b4b"/><rect x="14" y="4" width="8" height="9" rx="2" fill="#ffd23f"/>
+      <rect x="25" y="4" width="8" height="9" rx="2" fill="#3fa9ff"/><rect x="36" y="4" width="8" height="9" rx="2" fill="#ff8c1a"/>
+    </svg>
+    <span>BRICK REMOTE</span>
+  </div>
+  <nav>
+    <button data-tab="car" class="on">🚗 Car</button>
+    <button data-tab="ports">🕹️ Ports</button>
+    <button data-tab="program">🧩 Program</button>
+    <button data-tab="path">🗺️ Path</button>
+  </nav>
+  <div class="battery" id="battery" title="battery"><div class="cell"><div class="fill"></div></div><b>?%</b></div>
+</header>
+
+<main>
+  <!-- CAR -->
+  <section id="car" class="on">
+    <div class="row">
+      <div class="col">
+        <button class="big" data-hold="drive:1">▲<small>FORWARD</small></button>
+        <button class="big orange" data-hold="drive:-1">▼<small>BACK</small></button>
+        <div class="meter-row">MOTOR <div class="meter"><div class="mid"></div><div class="bar" id="carMeter"></div></div></div>
+      </div>
+      <div class="col">
+        <svg class="wheel" id="wheel" viewBox="0 0 200 200" aria-label="steering wheel">
+          <g id="wheelG">
+            <circle cx="100" cy="100" r="88" fill="none" stroke="#8ed11f" stroke-width="20"/>
+            <circle cx="100" cy="100" r="88" fill="none" stroke="#5f9410" stroke-width="4" stroke-dasharray="8 14"/>
+            <path d="M18 100 H74 M126 100 H182 M100 126 V188" stroke="#8ed11f" stroke-width="18" stroke-linecap="round"/>
+            <circle cx="100" cy="100" r="28" fill="#1d1d1d" stroke="#8ed11f" stroke-width="10"/>
+            <circle cx="100" cy="100" r="9" fill="#ff8c1a"/>
+            <rect x="94" y="6" width="12" height="16" rx="4" fill="#ff8c1a"/>
+          </g>
+        </svg>
+        <div class="steer-label" id="steerLabel">STRAIGHT</div>
+        <div class="hint">drag the wheel, or use the arrow keys</div>
+      </div>
+      <div class="col">
+        <div class="label">Speed</div>
+        <div class="gears" id="gears"><button data-gear="1">1</button><button data-gear="2">2</button><button data-gear="3">3</button></div>
+      </div>
+      <div class="col">
+        <div style="display:flex; gap:12px">
+          <button class="big" data-hold="steer:1">◀<small>LEFT</small></button>
+          <button class="big" data-hold="steer:-1">▶<small>RIGHT</small></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTS -->
+  <section id="ports">
+    <div class="row">
+      <div class="col">
+        <div class="stick" data-v="a" data-h="b"><span class="lab n">A▲</span><span class="lab s">A▼</span><span class="lab w">◀B</span><span class="lab e">B▶</span><div class="knob"></div></div>
+        <div class="meter-row">A <div class="meter"><div class="mid"></div><div class="bar" data-meter="a"></div></div><span class="tag" data-tag="a"></span></div>
+        <div class="meter-row">B <div class="meter"><div class="mid"></div><div class="bar" data-meter="b"></div></div><span class="tag" data-tag="b"></span></div>
+      </div>
+      <div class="col panel">
+        <div class="label">Speed</div>
+        <div class="gears" id="gears2"><button data-gear="1">1</button><button data-gear="2">2</button><button data-gear="3">3</button></div>
+        <div class="label" style="margin-top:8px">Pair</div>
+        <div class="chips" id="pair"><button class="chip on" data-pair="">off</button><button class="chip" data-pair="a:b">A+B</button><button class="chip" data-pair="a:c">A+C</button></div>
+        <div class="hint" style="max-width:200px;text-align:center">paired ports always do the same thing</div>
+        <div class="label" style="margin-top:8px">Reverse</div>
+        <div class="chips" id="reverse"><button class="chip" data-rev="a">A</button><button class="chip" data-rev="b">B</button><button class="chip" data-rev="c">C</button><button class="chip" data-rev="d">D</button></div>
+        <div class="hint" style="max-width:200px;text-align:center">for a motor that is built in the other way round</div>
+      </div>
+      <div class="col">
+        <div class="stick" data-v="c" data-h="d"><span class="lab n">C▲</span><span class="lab s">C▼</span><span class="lab w">◀D</span><span class="lab e">D▶</span><div class="knob"></div></div>
+        <div class="meter-row">C <div class="meter"><div class="mid"></div><div class="bar" data-meter="c"></div></div><span class="tag" data-tag="c"></span></div>
+        <div class="meter-row">D <div class="meter"><div class="mid"></div><div class="bar" data-meter="d"></div></div><span class="tag" data-tag="d"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAM -->
+  <section id="program">
+    <div class="editor-wrap">
+      <div>
+        <div class="label">My program</div>
+        <textarea id="programText" spellcheck="false"></textarea>
+        <div class="actions">
+          <button class="action run" data-run="program">▶ RUN</button>
+          <button class="action edit" id="clearProgram">🧽 Clear</button>
+          <button class="action stop" data-stop>■ STOP</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="label">Add a block</div>
+        <div class="blocks" style="margin-top:10px">
+          <button class="block motion" data-add="a + 1">A ▲ 1 s</button>
+          <button class="block motion" data-add="a - 1">A ▼ 1 s</button>
+          <button class="block motion" data-add="b + 1">B ▲ 1 s</button>
+          <button class="block motion" data-add="b - 1">B ▼ 1 s</button>
+          <button class="block motion" data-add="c + 1">C ▲ 1 s</button>
+          <button class="block motion" data-add="c - 1">C ▼ 1 s</button>
+          <button class="block motion" data-add="d + 1">D ▲ 1 s</button>
+          <button class="block motion" data-add="d - 1">D ▼ 1 s</button>
+          <button class="block control" data-add="wait 1">⏱ wait 1 s</button>
+          <button class="block control" data-add="stop">✋ stop</button>
+          <button class="block control" data-add="repeat 3">🔁 repeat 3</button>
+          <button class="block control" data-add="end">⤴ end</button>
+          <button class="block speed" data-add="gear 1">🐢 speed 1</button>
+          <button class="block speed" data-add="gear 3">🐇 speed 3</button>
+        </div>
+        <p class="hint">Tip: change the numbers in the program to make things longer or shorter.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PATH -->
+  <section id="path">
+    <div class="path-wrap">
+      <div>
+        <div class="label">Draw a path — tap squares in a straight line from the car</div>
+        <canvas id="grid" width="800" height="560"></canvas>
+        <div class="actions">
+          <button class="action run" data-run="path">▶ GO!</button>
+          <button class="action edit" id="undoPath">↶ Undo</button>
+          <button class="action edit" id="clearPath">🧽 Clear</button>
+          <button class="action stop" data-stop>■ STOP</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="label">Route</div>
+        <textarea id="pathText" spellcheck="false" style="min-height:180px"></textarea>
+        <p class="hint">1 square = 0.5 m</p>
+        <div class="label">Calibration</div>
+        <div class="slider">Speed: <span id="mpsVal"></span> m/s<input type="range" id="mps" min="0.1" max="2" step="0.05"></div>
+        <div class="slider">Turning: <span id="dpsVal"></span> °/s<input type="range" id="dps" min="20" max="360" step="5"></div>
+        <p class="hint">Measure how far your car goes in 1 second, and how fast it turns, then set them here.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <button class="stopall" data-stop>STOP</button>
+  <div class="msg" id="msg">Hi! Let's drive.</div>
+  <div class="hint">space = stop</div>
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="brick">
+    <div class="stud" style="background:#ff4b4b"></div><div class="stud" style="background:#ffd23f"></div>
+    <div class="stud" style="background:#3fa9ff"></div><div class="stud" style="background:#ff8c1a"></div>
+  </div>
+  <div style="height:60px"></div>
+  <h1 id="overlayTitle">Looking for your brick…</h1>
+  <p id="overlayText">Turn it on with the power button. The light blinks while it waits for us.</p>
+</div>
+
+<script>
+"use strict";
+addEventListener("error", e => { const m = document.getElementById("msg"); if (m) m.textContent = "Oops: " + e.message; });
+const GEARS = [60, 120, 255];
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+
+let ws, state = null, settings = null;
+const held = { drive: 0, steer: 0 };          // car controls
+const sticks = { a: 0, b: 0, c: 0, d: 0 };    // ports, -1..1
+let tab = "car", lastSent = "", wheelAngle = 0, wheelDrag = null;
+
+// ---------- connection ----------
+function connect() {
+  ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`);
+  ws.onmessage = e => { const m = JSON.parse(e.data); if (m.type === "state") update(m); };
+  ws.onclose = () => { state = null; showOverlay(true, "Lost the remote…", "Is brickremote still running on the computer? Trying again…"); setTimeout(connect, 1000); };
+}
+function send(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
+function saveSettings(part) { Object.assign(settings, part); send({ type: "settings", settings: part }); }
+
+function showOverlay(on, title, text) {
+  $("#overlay").classList.toggle("hidden", !on);
+  if (title) $("#overlayTitle").textContent = title;
+  if (text) $("#overlayText").textContent = text;
+}
+
+// ---------- state from server ----------
+let firstState = true;
+function update(m) {
+  state = m;
+  if (firstState) { settings = m.settings; loadSettings(); firstState = false; }
+  else { settings.links = m.settings.links; settings.inverted = m.settings.inverted; }
+  showOverlay(!m.connected, "Looking for your brick…", "Turn it on with the power button. The light blinks while it waits for us.");
+  const b = m.battery, bat = $("#battery");
+  bat.querySelector(".fill").style.width = (b ?? 0) + "%";
+  bat.querySelector("b").textContent = (b ?? "?") + "%";
+  bat.style.color = b == null ? "var(--dim)" : b > 50 ? "var(--green)" : b > 20 ? "var(--yellow)" : "var(--red)";
+  if (m.log.length) $("#msg").textContent = m.log[m.log.length - 1];
+  for (const p of "abcd") setMeter($(`[data-meter="${p}"]`), m.speeds[p]);
+  setMeter($("#carMeter"), m.speeds[settings.drive_port]);
+  const followers = Object.values(settings.links);
+  for (const p of "abcd") $(`[data-tag="${p}"]`).textContent = followers.includes(p) ? "paired" : settings.inverted.includes(p) ? "reversed" : "";
+  $$("[data-run]").forEach(btn => btn.style.opacity = m.running ? .6 : 1);
+}
+function setMeter(el, speed) {
+  if (!el) return;
+  const pct = Math.abs(speed) / 255 * 50;
+  el.style.width = pct + "%";
+  el.style.left = speed >= 0 ? "50%" : (50 - pct) + "%";
+  el.style.background = speed >= 0 ? "var(--green)" : "var(--orange)";
+}
+
+function loadSettings() {
+  setGear(settings.gear, false);
+  $("#programText").value = settings.program;
+  $("#pathText").value = settings.path;
+  route = routeFromScript(settings.path) || [start];
+  drawGrid();
+  $("#mps").value = settings.calibration.metres_per_second;
+  $("#dps").value = settings.calibration.degrees_per_second;
+  showCal();
+  const link = Object.entries(settings.links)[0];
+  $$("#pair .chip").forEach(c => c.classList.toggle("on", c.dataset.pair === (link ? link.join(":") : "")));
+  $$("#reverse .chip").forEach(c => c.classList.toggle("on", settings.inverted.includes(c.dataset.rev)));
+}
+
+// ---------- tabs ----------
+$$("nav button").forEach(btn => btn.onclick = () => selectTab(btn.dataset.tab));
+function selectTab(name) {
+  if (!document.getElementById(name)) name = "car";
+  tab = name;
+  history.replaceState(null, "", "#" + name);
+  $$("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
+  $$("section").forEach(s => s.classList.toggle("on", s.id === name));
+  releaseAll();
+  if (name === "path") drawGrid();
+}
+
+// ---------- gears ----------
+function setGear(g, save = true) {
+  settings.gear = g;
+  $$("[data-gear]").forEach(b => b.classList.toggle("on", +b.dataset.gear === g));
+  if (save) saveSettings({ gear: g });
+}
+$$("[data-gear]").forEach(b => b.onclick = () => setGear(+b.dataset.gear));
+
+// ---------- hold buttons ----------
+$$("[data-hold]").forEach(btn => {
+  const [axis, dir] = btn.dataset.hold.split(":");
+  const down = e => { e.preventDefault(); btn.setPointerCapture?.(e.pointerId); held[axis] = +dir; btn.classList.add("down"); };
+  const up = () => { if (held[axis] === +dir) held[axis] = 0; btn.classList.remove("down"); };
+  btn.addEventListener("pointerdown", down);
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => btn.addEventListener(ev, up));
+});
+function releaseAll() {
+  held.drive = held.steer = 0; for (const p in sticks) sticks[p] = 0;
+  $$(".big.down").forEach(b => b.classList.remove("down"));
+  $$(".knob").forEach(k => k.style.transform = "");
+}
+
+// ---------- steering wheel drag ----------
+const wheel = $("#wheel");
+wheel.addEventListener("pointerdown", e => {
+  wheel.setPointerCapture(e.pointerId);
+  const r = wheel.getBoundingClientRect();
+  wheelDrag = { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+  wheelDrag.start = Math.atan2(e.clientY - wheelDrag.cy, e.clientX - wheelDrag.cx);
+});
+wheel.addEventListener("pointermove", e => {
+  if (!wheelDrag) return;
+  let d = Math.atan2(e.clientY - wheelDrag.cy, e.clientX - wheelDrag.cx) - wheelDrag.start;
+  d = Math.atan2(Math.sin(d), Math.cos(d)) * 180 / Math.PI;      // -180..180, clockwise positive
+  held.steer = d < -15 ? 1 : d > 15 ? -1 : 0;                     // anticlockwise = left
+  wheelDrag.angle = Math.max(-90, Math.min(90, d));
+});
+["pointerup", "pointercancel"].forEach(ev => wheel.addEventListener(ev, () => { wheelDrag = null; held.steer = 0; }));
+
+// ---------- joysticks ----------
+$$(".stick").forEach(stick => {
+  const knob = $(".knob", stick), v = stick.dataset.v, h = stick.dataset.h;
+  const move = e => {
+    const r = stick.getBoundingClientRect(), R = r.width / 2;
+    let x = (e.clientX - r.left - R) / (R * .66), y = (e.clientY - r.top - R) / (R * .66);
+    const len = Math.hypot(x, y); if (len > 1) { x /= len; y /= len; }
+    knob.style.transform = `translate(${x * R * .66}px, ${y * R * .66}px)`;
+    sticks[v] = Math.abs(y) < .2 ? 0 : -y; sticks[h] = Math.abs(x) < .2 ? 0 : x;
+  };
+  stick.addEventListener("pointerdown", e => { stick.setPointerCapture(e.pointerId); move(e); });
+  stick.addEventListener("pointermove", e => { if (stick.hasPointerCapture(e.pointerId)) move(e); });
+  ["pointerup", "pointercancel"].forEach(ev => stick.addEventListener(ev, () => { knob.style.transform = ""; sticks[v] = sticks[h] = 0; }));
+});
+
+// ---------- keyboard ----------
+const keyMap = { ArrowUp: ["car", "drive", 1], ArrowDown: ["car", "drive", -1], ArrowLeft: ["car", "steer", 1], ArrowRight: ["car", "steer", -1],
+  w: ["ports", "a", 1], s: ["ports", "a", -1], d: ["ports", "b", 1], a: ["ports", "b", -1],
+  i: ["ports", "c", 1], k: ["ports", "c", -1], l: ["ports", "d", 1], j: ["ports", "d", -1] };
+addEventListener("keydown", e => {
+  if (e.target.tagName === "TEXTAREA") return;
+  if (e.key === " ") { e.preventDefault(); stopAll(); return; }
+  if ("123".includes(e.key) && e.key) { setGear(+e.key); return; }
+  const k = keyMap[e.key] || keyMap[e.key.toLowerCase()];
+  if (!k || k[0] !== tab) return;
+  e.preventDefault();
+  if (tab === "car") held[k[1]] = k[2]; else sticks[k[1]] = k[2];
+});
+addEventListener("keyup", e => {
+  const k = keyMap[e.key] || keyMap[e.key.toLowerCase()];
+  if (!k) return;
+  if (k[0] === "car" && held[k[1]] === k[2]) held[k[1]] = 0;
+  if (k[0] === "ports" && sticks[k[1]] === k[2]) sticks[k[1]] = 0;
+});
+addEventListener("blur", releaseAll);
+document.addEventListener("visibilitychange", () => document.hidden && releaseAll());
+
+// ---------- the drive loop ----------
+function wanted() {
+  const speed = GEARS[settings.gear - 1];
+  if (tab === "car") {
+    return { [settings.drive_port]: held.drive * speed, [settings.steer_port]: held.steer * 255 };
+  }
+  if (tab === "ports") {
+    const followers = Object.values(settings.links), out = {};
+    for (const p of "abcd") if (!followers.includes(p)) out[p] = Math.round(sticks[p] * speed);
+    return out;
+  }
+  return null;
+}
+setInterval(() => {
+  if (!settings || !state || !state.connected || state.running) return;
+  const want = wanted();
+  if (!want) return;
+  const json = JSON.stringify(want), moving = Object.values(want).some(v => v);
+  if (moving || json !== lastSent) send({ type: "drive", speeds: want });   // repeat while moving (dead-man)
+  lastSent = json;
+}, 100);
+
+// wheel animation: follows the drag, or springs to the steering direction
+(function animate() {
+  const target = wheelDrag && wheelDrag.angle != null ? wheelDrag.angle : -held.steer * 60;
+  wheelAngle += (target - wheelAngle) * (wheelDrag ? .6 : .2);
+  $("#wheelG").style.transform = `rotate(${wheelAngle}deg)`;
+  $("#steerLabel").textContent = held.steer > 0 ? "◀  LEFT" : held.steer < 0 ? "RIGHT  ▶" : "STRAIGHT";
+  requestAnimationFrame(animate);
+})();
+
+// ---------- stop ----------
+function stopAll() { releaseAll(); send({ type: "stop" }); }
+$$("[data-stop]").forEach(b => b.onclick = stopAll);
+
+// ---------- pair / reverse ----------
+$$("#pair .chip").forEach(c => c.onclick = () => {
+  const links = c.dataset.pair ? Object.fromEntries([c.dataset.pair.split(":")]) : {};
+  $$("#pair .chip").forEach(x => x.classList.toggle("on", x === c));
+  saveSettings({ links });
+});
+$$("#reverse .chip").forEach(c => c.onclick = () => {
+  c.classList.toggle("on");
+  saveSettings({ inverted: $$("#reverse .chip.on").map(x => x.dataset.rev) });
+});
+
+// ---------- program ----------
+const programText = $("#programText");
+let saveTimer;
+programText.addEventListener("input", () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => saveSettings({ program: programText.value }), 300); });
+$$("[data-add]").forEach(b => b.onclick = () => {
+  const lines = programText.value.replace(/\s+$/, "").split("\n");
+  const depth = lines.reduce((d, l) => { const w = l.trim().split(/\s+/)[0]; return w === "repeat" || w === "forever" ? d + 1 : w === "end" ? Math.max(0, d - 1) : d; }, 0);
+  const add = b.dataset.add, indent = "  ".repeat(add === "end" ? Math.max(0, depth - 1) : depth);
+  programText.value = (programText.value.trim() ? programText.value.replace(/\s+$/, "") + "\n" : "") + indent + add + "\n";
+  saveSettings({ program: programText.value });
+});
+$("#clearProgram").onclick = () => { programText.value = ""; saveSettings({ program: "" }); };
+$$("[data-run]").forEach(b => b.onclick = () => {
+  if (b.dataset.run === "program") saveSettings({ program: programText.value });
+  else saveSettings({ path: $("#pathText").value });
+  send({ type: b.dataset.run === "program" ? "run_program" : "run_path" });
+});
+
+// ---------- path drawing ----------
+const canvas = $("#grid"), ctx = canvas.getContext("2d");
+const COLS = 16, ROWS = 11;
+const start = { x: 7, y: 9 };
+let route = [start];
+
+function cell() { return canvas.width / COLS; }
+function drawGrid() {
+  const c = cell();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "rgba(255,255,255,.45)"; ctx.lineWidth = 1;
+  for (let i = 0; i <= COLS; i++) { ctx.beginPath(); ctx.moveTo(i * c, 0); ctx.lineTo(i * c, ROWS * c); ctx.stroke(); }
+  for (let j = 0; j <= ROWS; j++) { ctx.beginPath(); ctx.moveTo(0, j * c); ctx.lineTo(COLS * c, j * c); ctx.stroke(); }
+  ctx.strokeStyle = "#ff8c1a"; ctx.lineWidth = c * .32; ctx.lineCap = ctx.lineJoin = "round";
+  ctx.beginPath();
+  route.forEach((p, i) => { const X = (p.x + .5) * c, Y = (p.y + .5) * c; i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); });
+  ctx.stroke();
+  route.forEach((p, i) => {
+    ctx.fillStyle = i === route.length - 1 && i ? "#ff4b4b" : "#fff";
+    ctx.beginPath(); ctx.arc((p.x + .5) * c, (p.y + .5) * c, c * .14, 0, 7); ctx.fill();
+  });
+  drawCar((start.x + .5) * c, (start.y + .5) * c, c);
+}
+// A little top-down car pointing up, drawn by hand so it looks the same on every device.
+function drawCar(x, y, c) {
+  const w = c * .5, h = c * .78;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = "#222";                                   // wheels
+  for (const [wx, wy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) ctx.fillRect(wx * w * .52 - c * .06, wy * h * .28 - c * .09, c * .12, c * .18);
+  ctx.fillStyle = "#ff4b4b";                                // body
+  ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, c * .14); ctx.fill();
+  ctx.fillStyle = "#bfe8ff";                                // windscreen at the front
+  ctx.beginPath(); ctx.roundRect(-w * .36, -h * .3, w * .72, h * .2, c * .04); ctx.fill();
+  ctx.fillStyle = "#ffd23f";                                // headlights
+  ctx.fillRect(-w * .42, -h * .5, w * .2, c * .05); ctx.fillRect(w * .22, -h * .5, w * .2, c * .05);
+  ctx.restore();
+}
+function routeToScript() {
+  const lines = ["# drawn on the grid - 1 square = 0.5 m"];
+  let heading = [0, -1];   // facing up
+  for (let i = 1; i < route.length; i++) {
+    const dx = Math.sign(route[i].x - route[i - 1].x), dy = Math.sign(route[i].y - route[i - 1].y);
+    const dist = (Math.abs(route[i].x - route[i - 1].x) + Math.abs(route[i].y - route[i - 1].y)) * .5;
+    const cross = heading[0] * dy - heading[1] * dx, dot = heading[0] * dx + heading[1] * dy;
+    if (dot < 0) lines.push("left 180");
+    else if (cross < 0) lines.push("left 90");
+    else if (cross > 0) lines.push("right 90");
+    heading = [dx, dy];
+    const last = lines[lines.length - 1];
+    if (last.startsWith("forward ")) lines[lines.length - 1] = "forward " + (parseFloat(last.slice(8)) + dist);
+    else lines.push("forward " + dist);
+  }
+  return lines.join("\n") + "\n";
+}
+// Draw a typed or saved route on the grid when it fits: whole squares and right-angle turns.
+function routeFromScript(text) {
+  const pts = [start]; let [x, y] = [start.x, start.y], h = [0, -1];
+  for (const raw of text.split("\n")) {
+    const words = raw.split("#")[0].trim().split(/\s+/);
+    if (!words[0]) continue;
+    const n = parseFloat(words[1]);
+    if (words[0] === "left" || words[0] === "right") {
+      if (n % 90) return null;
+      for (let i = 0; i < n / 90; i++) h = words[0] === "left" ? [h[1], -h[0]] : [-h[1], h[0]];
+    } else if (words[0] === "forward" || words[0] === "back") {
+      const steps = n / .5; if (!Number.isInteger(steps)) return null;
+      const d = words[0] === "forward" ? 1 : -1;
+      x += h[0] * steps * d; y += h[1] * steps * d;
+      if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return null;
+      pts.push({ x, y });
+    } else return null;
+  }
+  return pts;
+}
+function routeChanged() { drawGrid(); $("#pathText").value = routeToScript(); saveSettings({ path: $("#pathText").value }); }
+canvas.addEventListener("pointerdown", e => {
+  const r = canvas.getBoundingClientRect(), scale = canvas.width / r.width;
+  const x = Math.floor((e.clientX - r.left) * scale / cell()), y = Math.floor((e.clientY - r.top) * scale / cell());
+  const last = route[route.length - 1];
+  if (x < 0 || y < 0 || x >= COLS || y >= ROWS || (x === last.x && y === last.y)) return;
+  if (x !== last.x && y !== last.y) { $("#msg").textContent = "Paths go in straight lines - tap a square in the same row or column."; return; }
+  route.push({ x, y }); routeChanged();
+});
+$("#undoPath").onclick = () => { if (route.length > 1) { route.pop(); routeChanged(); } };
+$("#clearPath").onclick = () => { route = [start]; routeChanged(); };
+$("#pathText").addEventListener("input", () => {
+  const pts = routeFromScript($("#pathText").value);
+  if (pts) { route = pts; drawGrid(); }
+  clearTimeout(saveTimer); saveTimer = setTimeout(() => saveSettings({ path: $("#pathText").value }), 300);
+});
+function showCal() { $("#mpsVal").textContent = (+$("#mps").value).toFixed(2); $("#dpsVal").textContent = $("#dps").value; }
+["mps", "dps"].forEach(id => $("#" + id).addEventListener("input", () => {
+  showCal();
+  saveSettings({ calibration: { metres_per_second: +$("#mps").value, degrees_per_second: +$("#dps").value } });
+}));
+
+connect();
+selectTab(location.hash.slice(1) || "car");
+</script>
+</body>
+</html>
