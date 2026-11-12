@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="tlh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brick Remote</title>
+<meta name="description" content="LEGO®-compatible Bluetooth Duj yIchIj! De'wI' tablet joq yIlo'. Huch Hutlh, ngoq poSmoH.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffaf0; --ink: #1d1d1f; --soft: #5b5b66; --card: #ffffff; --line: #ece4d4;
+  --red: #ff4b4b; --yellow: #ffd23f; --green: #7cc41a; --blue: #2f9bff; --orange: #ff8c1a; --purple: #8a5cff;
+  --shadow: 0 8px 0 rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141414; --ink: #f4f4f4; --soft: #b4b4bd; --card: #1f1f1f; --line: #2c2c2c; --shadow: 0 8px 0 rgba(0,0,0,.4); }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Fredoka", ui-rounded, system-ui, sans-serif; font-size: 19px; line-height: 1.55; }
+a { color: var(--blue); }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* studs row used as a decoration */
+.studs { display: flex; gap: 10px; }
+.studs i { width: 34px; height: 20px; border-radius: 8px 8px 3px 3px; display: block; }
+.studs i:nth-child(1) { background: var(--red); } .studs i:nth-child(2) { background: var(--yellow); }
+.studs i:nth-child(3) { background: var(--green); } .studs i:nth-child(4) { background: var(--blue); }
+
+/* hero */
+.hero { padding: 48px 0 30px; text-align: center; }
+.hero .studs { justify-content: center; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(42px, 8vw, 84px); line-height: 1; margin: 0 0 14px; font-weight: 700; letter-spacing: -1px; }
+.hero h1 span { color: var(--green); }
+.hero p.lead { font-size: clamp(20px, 2.6vw, 27px); color: var(--soft); max-width: 720px; margin: 0 auto 26px; }
+.btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 14px 26px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 20px;
+  box-shadow: var(--shadow); transition: transform .1s; }
+.btn:hover { transform: translateY(-3px); }
+.btn.go { background: var(--green); color: #111; } .btn.alt { background: var(--card); color: var(--ink); border: 3px solid var(--line); }
+.screen { margin: 36px auto 0; max-width: 940px; border-radius: 24px; overflow: hidden; border: 10px solid #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(-1deg); }
+
+/* demo video */
+.demo { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+.demo video { width: min(320px, 80vw); aspect-ratio: 9 / 16; border-radius: 34px; border: 10px solid #111; background: #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(2deg); display: block; }
+.demo ol { margin: 0; padding-left: 24px; font-size: 22px; } .demo li { margin: 8px 0; }
+@media (max-width: 760px) { .demo { grid-template-columns: 1fr; justify-items: center; text-align: center; } .demo ol { text-align: left; } }
+
+/* language menu */
+.lang { position: absolute; top: 14px; right: 16px; font-size: 22px; }
+.lang select { font: 600 17px "Fredoka", ui-rounded, system-ui, sans-serif; color: var(--ink); background: var(--card);
+  border: 2px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.langs { margin-top: 14px; font-size: 15px; line-height: 2; }
+.langs a { color: var(--soft); text-decoration: none; } .langs a[aria-current] { color: var(--green); font-weight: 700; }
+.hero { position: relative; }
+
+/* sections */
+section { padding: 46px 0; }
+h2 { font-size: clamp(32px, 5vw, 48px); margin: 0 0 8px; line-height: 1.1; }
+h2 .emoji { display: inline-block; transform: rotate(-8deg); }
+.sub { color: var(--soft); font-size: 21px; margin: 0 0 28px; }
+
+/* need list */
+.need { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+.tile { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 22px; box-shadow: var(--shadow); }
+.tile .big { font-size: 46px; line-height: 1; }
+.tile h3 { margin: 10px 0 4px; font-size: 24px; }
+.tile p { margin: 0; color: var(--soft); }
+
+/* steps */
+.steps { display: grid; gap: 18px; counter-reset: step; }
+.step { display: grid; grid-template-columns: 74px 1fr; gap: 18px; align-items: start; background: var(--card);
+  border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.step::before { counter-increment: step; content: counter(step); width: 74px; height: 74px; border-radius: 20px; display: grid; place-items: center;
+  font-size: 40px; font-weight: 700; color: #111; }
+.step:nth-child(1)::before { background: var(--red); } .step:nth-child(2)::before { background: var(--yellow); }
+.step:nth-child(3)::before { background: var(--green); } .step:nth-child(4)::before { background: var(--blue); }
+.step h3 { margin: 4px 0 6px; font-size: 25px; }
+.step p { margin: 0 0 8px; color: var(--soft); }
+.grownup { display: inline-block; background: var(--purple); color: #fff; font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
+pre, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+pre { background: #111; color: #e8ffd0; padding: 14px 16px; border-radius: 16px; overflow-x: auto; font-size: 16px; margin: 8px 0; position: relative; }
+pre .c { color: #8a8a8a; }
+.copy { position: absolute; right: 10px; top: 10px; background: var(--green); color: #111; border: 0; border-radius: 10px; font: 700 14px "Fredoka", sans-serif;
+  padding: 4px 10px; cursor: pointer; }
+
+/* modes */
+.mode { display: grid; grid-template-columns: 1.1fr 1fr; gap: 30px; align-items: center; margin: 0 0 46px; }
+.mode:nth-child(even) .pic { order: 2; }
+.mode .pic img { border-radius: 18px; border: 6px solid #111; box-shadow: 0 16px 40px rgba(0,0,0,.2); }
+.mode h3 { font-size: 34px; margin: 0 0 8px; }
+.mode .tag { display: inline-block; padding: 4px 14px; border-radius: 999px; color: #111; font-weight: 700; margin-bottom: 10px; }
+.mode p { color: var(--soft); margin: 0 0 10px; }
+.mode ul { margin: 0; padding-left: 22px; color: var(--soft); }
+
+/* programs */
+.progs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.prog { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.prog h3 { margin: 0 0 4px; font-size: 24px; }
+.prog p { margin: 0 0 6px; color: var(--soft); }
+
+/* keys */
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.key { display: flex; align-items: center; gap: 14px; background: var(--card); border: 3px solid var(--line); border-radius: 18px; padding: 12px 16px; }
+kbd { display: inline-grid; place-items: center; min-width: 44px; height: 44px; padding: 0 10px; border-radius: 10px; background: #fff; color: #111;
+  border: 2px solid #ccc; border-bottom-width: 5px; font: 700 18px "Fredoka", sans-serif; }
+
+/* safety */
+.safety { background: var(--red); color: #fff; border-radius: 30px; padding: 28px; display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+.safety .stop { width: 110px; height: 110px; background: #fff; color: var(--red); border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 28px; box-shadow: 0 8px 0 rgba(0,0,0,.2); }
+.safety h2 { color: #fff; } .safety p { margin: 0; font-size: 21px; }
+
+/* grown-ups */
+.grownups { background: var(--card); border: 3px solid var(--line); border-radius: 30px; padding: 30px; }
+.grownups h3 { margin: 18px 0 6px; }
+.grownups p, .grownups li { color: var(--soft); }
+
+footer { padding: 40px 0 60px; text-align: center; color: var(--soft); }
+footer .studs { justify-content: center; margin-bottom: 12px; }
+
+@media (max-width: 760px) {
+  .lang { position: static; display: block; margin-bottom: 18px; }
+  .mode { grid-template-columns: 1fr; } .mode:nth-child(even) .pic { order: 0; }
+  .safety { grid-template-columns: 1fr; text-align: center; } .safety .stop { margin: 0 auto; }
+  .step { grid-template-columns: 1fr; } .step::before { width: 60px; height: 60px; font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <!-- lang -->
+  <label class="lang">🌍 <select aria-label="Language" onchange="location.href=this.value"><option value="index.html" lang="en">English</option><option value="de.html" lang="de">Deutsch</option><option value="pt.html" lang="pt-BR">Português (Brasil)</option><option value="sk.html" lang="sk">Slovenčina</option><option value="uk.html" lang="uk">Українська</option><option value="bg.html" lang="bg">Български</option><option value="ca.html" lang="ca">Català</option><option value="es.html" lang="es">Español</option><option value="it.html" lang="it">Italiano</option><option value="fr.html" lang="fr">Français</option><option value="el.html" lang="el">Ελληνικά</option><option value="tlh.html" selected lang="tlh">tlhIngan Hol (Klingon)</option></select></label>
+  <!-- /lang -->
+  <div class="wrap">
+    <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <h1>Brick <span>Remote</span></h1>
+    <p class="lead">LEGO®-compatible Duj yIchIj! De'wI' tablet joq yIlo'. yIDIj, Qeq yIvang, yIQoQmoH, He yIghItlh 'ej Duj tlha'!</p>
+    <div class="btns">
+      <a class="btn go" href="#start">🚀 wa'DIch yIruch!</a>
+      <a class="btn alt" href="#play">🎮 nuq laH?</a>
+    </div>
+    <div class="screen"><img src="img/car.jpg" alt="Brick Remote ghun: SuDqu' DIjwI' tIn, ghIt 'ej Dung Quvmey, Do 1, 2, 3" width="1280" height="800"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap demo">
+    <video src="img/demo.mp4" poster="img/demo-poster.jpg" autoplay muted loop playsinline aria-label="Video: blok chu'lu', chu'wI' tu'lu', Duj leng"></video>
+    <div>
+      <h2><span class="emoji">🎬</span> yIlegh!</h2>
+      <ol>
+        <li>blok Quv yI'uy. wov.</li>
+        <li>Brick Remote tu' 'ej DIjwI' 'agh.</li>
+        <li>yIchIj! Qapla'!</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🧰</span> nuq DapoQ</h2>
+    <p class="sub">wej Doch neH.</p>
+    <div class="need">
+      <div class="tile"><div class="big">🧱</div><h3>QuQ blok</h3><p>QuQ A, B, C, D Huch 'aplo'. <b>XP Block</b> ghun ghaj. ghItlh: "Smart creative module".</p></div>
+      <div class="tile"><div class="big">💻</div><h3>De'wI'</h3><p>Bluetooth ghaj: Raspberry Pi, laptop, De'wI' tIn joq. tablet ghogh HablI' joq chu'wI' moj.</p></div>
+      <div class="tile"><div class="big">🧑‍🔧</div><h3>qup</h3><p>wa'DIch neH. ghIq SoH Duj DevwI'!</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2><span class="emoji">🚀</span> loS mIw</h2>
+    <p class="sub">1, 2 mIw wa'logh neH.</p>
+    <div class="steps">
+      <div class="step"><div>
+        <h3>Brick Remote yISuq <span class="grownup">qup</span></h3>
+        <p>Python yIlo':</p>
+        <pre><button class="copy" data-done="qonta'!">yIqon</button>pip install "brickremote[web]"</pre>
+        <p>ngoq yItlhap 'ej <code>./run.sh</code> yIlo'. Hoch wa'logh qaSmoH.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Duj yIchenmoH</h3>
+        <p>leng QuQ <b>A</b> yIrar. DIj QuQ <b>D</b> yIrar. Duj 'aplo' rur.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>blok yIchu'</h3>
+        <p>chu'wI' Quv yI'uy. wov 'ej wovHa'. SoH loS!</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>chu'wI' yIchu'</h3>
+        <pre><button class="copy" data-done="qonta'!">yIqon</button>brickremote web</pre>
+        <p>Daq yIpoSmoH. tablet: <code>:8080</code> Daq yIlo'. blok tu'lu'DI', wov 'ej yIchIj!</p>
+        <p>ghItlh DaparHa'? <code>brickremote</code> yIlo'. naQmey Hal.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section id="play">
+  <div class="wrap">
+    <h2><span class="emoji">🎮</span> loS Quj</h2>
+    <p class="sub">Dung Quvmey yIlo'.</p>
+
+    <div class="mode">
+      <div class="pic"><img src="img/car.jpg" alt="Duj HaSta, DIjwI' ghaj" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--green)">🚗 Duj</span>
+        <h3>Duj DevwI' yImoj</h3>
+        <p><b>FORWARD</b> yI'uch 'ej DIjwI' yIjIr. yImev 'ej DIjwI' botlh chegh. Duj teH rur.</p>
+        <ul><li>Do <b>1</b> (QIt), <b>2</b>, <b>3</b> (nom!) yIwIv</li><li>naQmey joq yIlo'</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/ports.jpg" alt="QuQ HaSta, cha' joystick" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--blue)">🕹️ QuQmey</span>
+        <h3>Hoch QuQ yISeH</h3>
+        <p>qengwI', qoqwI', tank joq DachenmoH'a'? cha' joystick loS QuQ SeH: A B, C D.</p>
+        <ul><li><b>Pair</b>: cha' QuQ tay' vIH. tank QaQ</li><li><b>Reverse</b>: QuQ lugh</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/program.jpg" alt="ghun HaSta, blokmey ghaj" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--orange)">🧩 ghun</span>
+        <h3>mIw yIghojmoH</h3>
+        <p>blokmey yI'uy, vIHmey tetlh yIchenmoH. <b>RUN</b> yI'uy 'ej yIlegh: Hoch ta' nIteb.</p>
+        <ul><li>SuD blokmey: QuQ vIH</li><li>Doq blokmey: loS 'ej qaS</li><li>SuDqu' blokmey: Do choH</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/path.jpg" alt="He HaSta, mIr ghaj" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--yellow)">🗺️ He</span>
+        <h3>He yIghItlh</h3>
+        <p>mIr Daqmey yI'uy. Duj ghoS. Hoch Daq: bID meter. <b>GO!</b> yI'uy 'ej leng!</p>
+        <ul><li>wa'logh Duj yIjuv, ghIq Do DIj joq yIqaSmoH. He QaQ.</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">💃</span> ghunmey yInejmoH</h2>
+    <p class="sub">wa' yIqon ghun HaSta. RUN yI'uy. mI'mey yIchoH 'ej yIlegh!</p>
+    <div class="progs">
+      <div class="prog"><h3>🐛 joq</h3><p>ghIt Dung, ghIt Dung, ghIt Dung.</p>
+<pre><button class="copy" data-done="qonta'!">yIqon</button>gear 2
+repeat 4
+  a + 0.5
+  a - 0.5
+end</pre></div>
+      <div class="prog"><h3>🌀 gho QoQ</h3><p>DIjwI' yIjIrqu' 'ej gho yIleng.</p>
+<pre><button class="copy" data-done="qonta'!">yIqon</button>repeat 3
+  d +     <span class="c"># poS yIDIj 'ej yIpol</span>
+  a + 2   <span class="c"># cha' lup yIleng</span>
+  stop
+  wait 0.5
+end</pre></div>
+      <div class="prog"><h3>🐢🐇 QIt, ghIq nom</h3><p>la'SIv ghun 'ej qa'.</p>
+<pre><button class="copy" data-done="qonta'!">yIqon</button>gear 1
+a + 2
+gear 3
+a + 1
+stop</pre></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">⌨️</span> naQmey</h2>
+    <p class="sub">naQmey Hal (<code>brickremote</code>). web ghun yIlo' je.</p>
+    <div class="keys">
+      <div class="key"><kbd>↑</kbd><kbd>↓</kbd> ghIt / Dung</div>
+      <div class="key"><kbd>←</kbd><kbd>→</kbd> poS / nIH</div>
+      <div class="key"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Do</div>
+      <div class="key"><kbd>Tab</kbd> HaSta veb</div>
+      <div class="key"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> QuQ A B</div>
+      <div class="key"><kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> QuQ C D</div>
+      <div class="key"><kbd>space</kbd> Hoch yImev!</div>
+      <div class="key"><kbd>Q</kbd> yImej</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="safety">
+      <div class="stop">STOP</div>
+      <div>
+        <h2>Qan wa'DIch!</h2>
+        <p>Doq <b>STOP</b> Quv (space joq) Hoch QuQ mevmoH DaH. ra'Duj yIleng, raS yIlengQo'. ghop yItaHHa'moH, rutlh Hav.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="grownups">
+  <div class="wrap">
+    <div class="grownups">
+      <h2><span class="emoji">🧑‍🔧</span> qupvaD</h2>
+      <p>Brick Remote: Huch Hutlh ngoq, ngoq poSmoH (MIT). Bluetooth LE QuQ blok <code>JG_JMC-xxxx</code> lo'. XP Block ghun rur. Linux (Raspberry Pi je), macOS, Windows Qap.</p>
+      <h3>ghun law'</h3>
+      <p>Python ghun mach je. Daghun DaneH'a'? yIchenmoH:</p>
+<pre><button class="copy" data-done="qonta'!">yIqon</button>import asyncio
+from brickremote import JMCModule
+
+async def main():
+    async with JMCModule() as m:
+        await m.run(2, a=255)   <span class="c"># QuQ A ghIt, cha' lup</span>
+
+asyncio.run(main())</pre>
+      <h3>yISov</h3>
+      <ul>
+        <li>blok mev nIteb, wa'maH tup Qapla'Hutlh.</li>
+        <li>QuQ A B wa' Do ghaj. C D je.</li>
+        <li>web chu'wI' QuQ mevmoH nIteb, web ghun ghoSDI'.</li>
+        <li>ngoq ghunlu' nIteb. XP Block ghunwI'pu' blok chenmoHwI'pu' joq ghunbe'.</li>
+        <li>LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this project. (tlhIngan Hol mughmeH mIw Hutlh.)</li>
+      </ul>
+      <p>ngoq, mIwmey, ra'mey: <a href="https://github.com/surak/brickremote">GitHub</a> (Terran Hol).</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  Brick Remote · Huch Hutlh · ngoq poSmoH · chenmoHwI'pu' Hoqvam
+  <!-- langs -->
+  <p class="langs"><a href="index.html" lang="en">English</a> · <a href="de.html" lang="de">Deutsch</a> · <a href="pt.html" lang="pt-BR">Português (Brasil)</a> · <a href="sk.html" lang="sk">Slovenčina</a> · <a href="uk.html" lang="uk">Українська</a> · <a href="bg.html" lang="bg">Български</a> · <a href="ca.html" lang="ca">Català</a> · <a href="es.html" lang="es">Español</a> · <a href="it.html" lang="it">Italiano</a> · <a href="fr.html" lang="fr">Français</a> · <a href="el.html" lang="el">Ελληνικά</a> · <a href="tlh.html" lang="tlh" aria-current="page">tlhIngan Hol (Klingon)</a></p>
+  <!-- /langs -->
+</footer>
+
+<script>
+document.querySelectorAll(".copy").forEach(btn => btn.addEventListener("click", () => {
+  const text = [...btn.parentElement.childNodes].filter(n => n !== btn).map(n => n.textContent).join("")
+    .split("\n").map(l => l.replace(/\s+#.*$/, "")).join("\n").trim();
+  navigator.clipboard.writeText(text).then(() => { const label = btn.textContent; btn.textContent = btn.dataset.done || "copied!"; setTimeout(() => btn.textContent = label, 1500); });
+}));
+</script>
+</body>
+</html>

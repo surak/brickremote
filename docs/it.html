@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brick Remote</title>
+<meta name="description" content="Guida la tua auto Bluetooth compatibile LEGO® da un computer o un tablet. Gratis e open source.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffaf0; --ink: #1d1d1f; --soft: #5b5b66; --card: #ffffff; --line: #ece4d4;
+  --red: #ff4b4b; --yellow: #ffd23f; --green: #7cc41a; --blue: #2f9bff; --orange: #ff8c1a; --purple: #8a5cff;
+  --shadow: 0 8px 0 rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141414; --ink: #f4f4f4; --soft: #b4b4bd; --card: #1f1f1f; --line: #2c2c2c; --shadow: 0 8px 0 rgba(0,0,0,.4); }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Fredoka", ui-rounded, system-ui, sans-serif; font-size: 19px; line-height: 1.55; }
+a { color: var(--blue); }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* studs row used as a decoration */
+.studs { display: flex; gap: 10px; }
+.studs i { width: 34px; height: 20px; border-radius: 8px 8px 3px 3px; display: block; }
+.studs i:nth-child(1) { background: var(--red); } .studs i:nth-child(2) { background: var(--yellow); }
+.studs i:nth-child(3) { background: var(--green); } .studs i:nth-child(4) { background: var(--blue); }
+
+/* hero */
+.hero { padding: 48px 0 30px; text-align: center; }
+.hero .studs { justify-content: center; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(42px, 8vw, 84px); line-height: 1; margin: 0 0 14px; font-weight: 700; letter-spacing: -1px; }
+.hero h1 span { color: var(--green); }
+.hero p.lead { font-size: clamp(20px, 2.6vw, 27px); color: var(--soft); max-width: 720px; margin: 0 auto 26px; }
+.btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 14px 26px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 20px;
+  box-shadow: var(--shadow); transition: transform .1s; }
+.btn:hover { transform: translateY(-3px); }
+.btn.go { background: var(--green); color: #111; } .btn.alt { background: var(--card); color: var(--ink); border: 3px solid var(--line); }
+.screen { margin: 36px auto 0; max-width: 940px; border-radius: 24px; overflow: hidden; border: 10px solid #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(-1deg); }
+
+/* demo video */
+.demo { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+.demo video { width: min(320px, 80vw); aspect-ratio: 9 / 16; border-radius: 34px; border: 10px solid #111; background: #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(2deg); display: block; }
+.demo ol { margin: 0; padding-left: 24px; font-size: 22px; } .demo li { margin: 8px 0; }
+@media (max-width: 760px) { .demo { grid-template-columns: 1fr; justify-items: center; text-align: center; } .demo ol { text-align: left; } }
+
+/* language menu */
+.lang { position: absolute; top: 14px; right: 16px; font-size: 22px; }
+.lang select { font: 600 17px "Fredoka", ui-rounded, system-ui, sans-serif; color: var(--ink); background: var(--card);
+  border: 2px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.langs { margin-top: 14px; font-size: 15px; line-height: 2; }
+.langs a { color: var(--soft); text-decoration: none; } .langs a[aria-current] { color: var(--green); font-weight: 700; }
+.hero { position: relative; }
+
+/* sections */
+section { padding: 46px 0; }
+h2 { font-size: clamp(32px, 5vw, 48px); margin: 0 0 8px; line-height: 1.1; }
+h2 .emoji { display: inline-block; transform: rotate(-8deg); }
+.sub { color: var(--soft); font-size: 21px; margin: 0 0 28px; }
+
+/* need list */
+.need { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+.tile { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 22px; box-shadow: var(--shadow); }
+.tile .big { font-size: 46px; line-height: 1; }
+.tile h3 { margin: 10px 0 4px; font-size: 24px; }
+.tile p { margin: 0; color: var(--soft); }
+
+/* steps */
+.steps { display: grid; gap: 18px; counter-reset: step; }
+.step { display: grid; grid-template-columns: 74px 1fr; gap: 18px; align-items: start; background: var(--card);
+  border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.step::before { counter-increment: step; content: counter(step); width: 74px; height: 74px; border-radius: 20px; display: grid; place-items: center;
+  font-size: 40px; font-weight: 700; color: #111; }
+.step:nth-child(1)::before { background: var(--red); } .step:nth-child(2)::before { background: var(--yellow); }
+.step:nth-child(3)::before { background: var(--green); } .step:nth-child(4)::before { background: var(--blue); }
+.step h3 { margin: 4px 0 6px; font-size: 25px; }
+.step p { margin: 0 0 8px; color: var(--soft); }
+.grownup { display: inline-block; background: var(--purple); color: #fff; font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
+pre, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+pre { background: #111; color: #e8ffd0; padding: 14px 16px; border-radius: 16px; overflow-x: auto; font-size: 16px; margin: 8px 0; position: relative; }
+pre .c { color: #8a8a8a; }
+.copy { position: absolute; right: 10px; top: 10px; background: var(--green); color: #111; border: 0; border-radius: 10px; font: 700 14px "Fredoka", sans-serif;
+  padding: 4px 10px; cursor: pointer; }
+
+/* modes */
+.mode { display: grid; grid-template-columns: 1.1fr 1fr; gap: 30px; align-items: center; margin: 0 0 46px; }
+.mode:nth-child(even) .pic { order: 2; }
+.mode .pic img { border-radius: 18px; border: 6px solid #111; box-shadow: 0 16px 40px rgba(0,0,0,.2); }
+.mode h3 { font-size: 34px; margin: 0 0 8px; }
+.mode .tag { display: inline-block; padding: 4px 14px; border-radius: 999px; color: #111; font-weight: 700; margin-bottom: 10px; }
+.mode p { color: var(--soft); margin: 0 0 10px; }
+.mode ul { margin: 0; padding-left: 22px; color: var(--soft); }
+
+/* programs */
+.progs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.prog { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.prog h3 { margin: 0 0 4px; font-size: 24px; }
+.prog p { margin: 0 0 6px; color: var(--soft); }
+
+/* keys */
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.key { display: flex; align-items: center; gap: 14px; background: var(--card); border: 3px solid var(--line); border-radius: 18px; padding: 12px 16px; }
+kbd { display: inline-grid; place-items: center; min-width: 44px; height: 44px; padding: 0 10px; border-radius: 10px; background: #fff; color: #111;
+  border: 2px solid #ccc; border-bottom-width: 5px; font: 700 18px "Fredoka", sans-serif; }
+
+/* safety */
+.safety { background: var(--red); color: #fff; border-radius: 30px; padding: 28px; display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+.safety .stop { width: 110px; height: 110px; background: #fff; color: var(--red); border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 28px; box-shadow: 0 8px 0 rgba(0,0,0,.2); }
+.safety h2 { color: #fff; } .safety p { margin: 0; font-size: 21px; }
+
+/* grown-ups */
+.grownups { background: var(--card); border: 3px solid var(--line); border-radius: 30px; padding: 30px; }
+.grownups h3 { margin: 18px 0 6px; }
+.grownups p, .grownups li { color: var(--soft); }
+
+footer { padding: 40px 0 60px; text-align: center; color: var(--soft); }
+footer .studs { justify-content: center; margin-bottom: 12px; }
+
+@media (max-width: 760px) {
+  .lang { position: static; display: block; margin-bottom: 18px; }
+  .mode { grid-template-columns: 1fr; } .mode:nth-child(even) .pic { order: 0; }
+  .safety { grid-template-columns: 1fr; text-align: center; } .safety .stop { margin: 0 auto; }
+  .step { grid-template-columns: 1fr; } .step::before { width: 60px; height: 60px; font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <!-- lang -->
+  <label class="lang">🌍 <select aria-label="Language" onchange="location.href=this.value"><option value="index.html" lang="en">English</option><option value="de.html" lang="de">Deutsch</option><option value="pt.html" lang="pt-BR">Português (Brasil)</option><option value="sk.html" lang="sk">Slovenčina</option><option value="uk.html" lang="uk">Українська</option><option value="bg.html" lang="bg">Български</option><option value="ca.html" lang="ca">Català</option><option value="es.html" lang="es">Español</option><option value="it.html" selected lang="it">Italiano</option><option value="fr.html" lang="fr">Français</option><option value="el.html" lang="el">Ελληνικά</option><option value="tlh.html" lang="tlh">tlhIngan Hol (Klingon)</option></select></label>
+  <!-- /lang -->
+  <div class="wrap">
+    <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <h1>Brick <span>Remote</span></h1>
+    <p class="lead">Guida la tua auto compatibile LEGO® con un computer o un tablet. Sterzala, fai le gare, insegnale a ballare o disegnale una strada da seguire!</p>
+    <div class="btns">
+      <a class="btn go" href="#start">🚀 Cominciamo</a>
+      <a class="btn alt" href="#play">🎮 Cosa sa fare?</a>
+    </div>
+    <div class="screen"><img src="img/car.jpg" alt="L'app Brick Remote con un grande volante verde, pulsanti avanti e indietro e velocità 1, 2, 3" width="1280" height="800"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap demo">
+    <video src="img/demo.mp4" poster="img/demo-poster.jpg" autoplay muted loop playsinline aria-label="Video: si accende il mattoncino, il telecomando lo trova e l'auto parte"></video>
+    <div>
+      <h2><span class="emoji">🎬</span> Guardalo in azione</h2>
+      <ol>
+        <li>Premi il pulsante del tuo mattoncino. Si accende.</li>
+        <li>Brick Remote lo trova e mostra il volante.</li>
+        <li>Guida!</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🧰</span> Cosa ti serve</h2>
+    <p class="sub">Solo tre cose.</p>
+    <div class="need">
+      <div class="tile"><div class="big">🧱</div><h3>Il tuo mattoncino motore</h3><p>La scatola delle batterie con le prese motore A, B, C e D. Di solito arriva con l'app <b>XP Block</b> e nel foglietto c'è scritto "Smart creative module".</p></div>
+      <div class="tile"><div class="big">💻</div><h3>Un computer</h3><p>Con Bluetooth: un Raspberry Pi, un portatile o un computer fisso. Anche un tablet o un telefono può fare da telecomando.</p></div>
+      <div class="tile"><div class="big">🧑‍🔧</div><h3>Un adulto</h3><p>Solo per la prima configurazione. Poi il pilota sei tu!</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2><span class="emoji">🚀</span> Parti in 4 passi</h2>
+    <p class="sub">I passi 1 e 2 si fanno una volta sola.</p>
+    <div class="steps">
+      <div class="step"><div>
+        <h3>Installa Brick Remote <span class="grownup">adulto</span></h3>
+        <p>Installalo con Python:</p>
+        <pre><button class="copy" data-done="copiato!">copia</button>pip install "brickremote[web]"</pre>
+        <p>Oppure scarica il codice e usa <code>./run.sh</code>, che la prima volta prepara tutto da solo.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Costruisci la tua auto</h3>
+        <p>Collega il motore di trazione alla presa <b>A</b> e il motore dello sterzo alla presa <b>D</b>. È così che è costruita l'auto della scatola.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Accendi il mattoncino</h3>
+        <p>Premi il pulsante di accensione. La luce inizia a lampeggiare: ti sta aspettando!</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Avvia il telecomando</h3>
+        <pre><button class="copy" data-done="copiato!">copia</button>brickremote web</pre>
+        <p>Apri in un browser l'indirizzo che compare. Su un tablet usa quello che finisce con <code>:8080</code>. Quando il mattoncino viene trovato, la luce smette di lampeggiare e puoi guidare!</p>
+        <p>Preferisci scrivere invece di cliccare? Avvia <code>brickremote</code> per la versione da tastiera.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section id="play">
+  <div class="wrap">
+    <h2><span class="emoji">🎮</span> Quattro modi per giocare</h2>
+    <p class="sub">Passa dall'uno all'altro con i pulsanti in alto.</p>
+
+    <div class="mode">
+      <div class="pic"><img src="img/car.jpg" alt="Schermata auto con volante" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--green)">🚗 Auto</span>
+        <h3>Sii il pilota</h3>
+        <p>Tieni premuto <b>FORWARD</b> per andare e gira il volante. Quando lo lasci, il volante torna al centro, proprio come in un'auto vera.</p>
+        <ul><li>Scegli la velocità <b>1</b> (piano), <b>2</b> o <b>3</b> (sfreccia!)</li><li>Oppure usa le frecce</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/ports.jpg" alt="Schermata prese con due joystick" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--blue)">🕹️ Prese</span>
+        <h3>Controlla ogni motore</h3>
+        <p>Hai costruito una gru, un robot o un carro armato? Due joystick controllano tutti e quattro i motori, uno per A e B, uno per C e D.</p>
+        <ul><li><b>Pair</b> fa muovere insieme due motori, perfetto per i carri armati</li><li><b>Reverse</b> sistema un motore che gira al contrario</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/program.jpg" alt="Schermata programma con blocchi" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--orange)">🧩 Programma</span>
+        <h3>Insegnale un trucco</h3>
+        <p>Tocca i blocchi colorati per creare una lista di mosse, poi premi <b>RUN</b> e guarda la tua creazione fare tutto da sola.</p>
+        <ul><li>I blocchi blu muovono i motori</li><li>I blocchi arancioni aspettano e ripetono</li><li>I blocchi verdi cambiano la velocità</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/path.jpg" alt="Schermata percorso con una griglia e un tragitto" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--yellow)">🗺️ Percorso</span>
+        <h3>Disegna una strada</h3>
+        <p>Tocca le caselle della griglia per disegnare dove deve andare l'auto. Ogni casella è mezzo metro. Premi <b>GO!</b> e via che va.</p>
+        <ul><li>Misura la tua auto una volta, poi regola i cursori di velocità e sterzata per percorsi perfetti</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">💃</span> Programmi da provare</h2>
+    <p class="sub">Copiane uno nella schermata Programma e premi RUN. Poi cambia i numeri e guarda cosa succede!</p>
+    <div class="progs">
+      <div class="prog"><h3>🐛 Lo scodinzolo</h3><p>Avanti e indietro, ancora e ancora.</p>
+<pre><button class="copy" data-done="copiato!">copia</button>gear 2
+repeat 4
+  a + 0.5
+  a - 0.5
+end</pre></div>
+      <div class="prog"><h3>🌀 Il ballo che gira</h3><p>Sterza tutto e gira in tondo.</p>
+<pre><button class="copy" data-done="copiato!">copia</button>repeat 3
+  d +     <span class="c"># sterza a sinistra e resta così</span>
+  a + 2   <span class="c"># vai per 2 secondi</span>
+  stop
+  wait 0.5
+end</pre></div>
+      <div class="prog"><h3>🐢🐇 Piano, poi veloce</h3><p>La lepre e la tartaruga.</p>
+<pre><button class="copy" data-done="copiato!">copia</button>gear 1
+a + 2
+gear 3
+a + 1
+stop</pre></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">⌨️</span> Tasti della tastiera</h2>
+    <p class="sub">Per la versione da tastiera (<code>brickremote</code>). Quasi tutti funzionano anche nella versione web.</p>
+    <div class="keys">
+      <div class="key"><kbd>↑</kbd><kbd>↓</kbd> avanti / indietro</div>
+      <div class="key"><kbd>←</kbd><kbd>→</kbd> sterza a sinistra / destra</div>
+      <div class="key"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> velocità</div>
+      <div class="key"><kbd>Tab</kbd> schermata successiva</div>
+      <div class="key"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> prese A e B</div>
+      <div class="key"><kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> prese C e D</div>
+      <div class="key"><kbd>spazio</kbd> FERMA tutto</div>
+      <div class="key"><kbd>Q</kbd> esci</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="safety">
+      <div class="stop">STOP</div>
+      <div>
+        <h2>Prima di tutto, la sicurezza!</h2>
+        <p>Il grande pulsante rosso <b>STOP</b> (o la barra spaziatrice) ferma subito tutti i motori. Guida sul pavimento, non sul tavolo, e tieni le dita lontane da ruote e ingranaggi che girano.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="grownups">
+  <div class="wrap">
+    <div class="grownups">
+      <h2><span class="emoji">🧑‍🔧</span> Per gli adulti</h2>
+      <p>Brick Remote è un software libero e open source (licenza MIT). Funziona con i moduli motore Bluetooth LE economici che si presentano come <code>JG_JMC-xxxx</code> e che di solito si usano con l'app per smartphone XP Block. Funziona su Linux (anche Raspberry Pi), macOS e Windows.</p>
+      <h3>Più di un'app</h3>
+      <p>È anche una piccola libreria Python, se vuole creare progetti propri:</p>
+<pre><button class="copy" data-done="copiato!">copia</button>import asyncio
+from brickremote import JMCModule
+
+async def main():
+    async with JMCModule() as m:
+        await m.run(2, a=255)   <span class="c"># presa A avanti per 2 secondi</span>
+
+asyncio.run(main())</pre>
+      <h3>Buono a sapersi</h3>
+      <ul>
+        <li>Il mattoncino si spegne da solo dopo circa dieci minuti senza comandi.</li>
+        <li>Le prese A e B condividono la stessa velocità, e così anche C e D.</li>
+        <li>Il telecomando web ferma i motori da solo se il browser sparisce (scheda chiusa, Wi-Fi perso).</li>
+        <li>Questo è un progetto indipendente. Non è realizzato dai produttori dell'app XP Block o dei mattoncini, né è collegato a loro.</li>
+        <li>LEGO® è un marchio registrato del Gruppo LEGO, che non sponsorizza, autorizza né approva questo progetto.</li>
+      </ul>
+      <p>Il codice, le note sul protocollo e l'elenco completo dei comandi sono nel <a href="https://github.com/surak/brickremote">progetto su GitHub</a> (in inglese).</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  Brick Remote · gratis e open source · fatto per costruttori curiosi
+  <!-- langs -->
+  <p class="langs"><a href="index.html" lang="en">English</a> · <a href="de.html" lang="de">Deutsch</a> · <a href="pt.html" lang="pt-BR">Português (Brasil)</a> · <a href="sk.html" lang="sk">Slovenčina</a> · <a href="uk.html" lang="uk">Українська</a> · <a href="bg.html" lang="bg">Български</a> · <a href="ca.html" lang="ca">Català</a> · <a href="es.html" lang="es">Español</a> · <a href="it.html" lang="it" aria-current="page">Italiano</a> · <a href="fr.html" lang="fr">Français</a> · <a href="el.html" lang="el">Ελληνικά</a> · <a href="tlh.html" lang="tlh">tlhIngan Hol (Klingon)</a></p>
+  <!-- /langs -->
+</footer>
+
+<script>
+document.querySelectorAll(".copy").forEach(btn => btn.addEventListener("click", () => {
+  const text = [...btn.parentElement.childNodes].filter(n => n !== btn).map(n => n.textContent).join("")
+    .split("\n").map(l => l.replace(/\s+#.*$/, "")).join("\n").trim();
+  navigator.clipboard.writeText(text).then(() => { const label = btn.textContent; btn.textContent = btn.dataset.done || "copied!"; setTimeout(() => btn.textContent = label, 1500); });
+}));
+</script>
+</body>
+</html>

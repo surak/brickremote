@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brick Remote</title>
+<meta name="description" content="Керуй своєю Bluetooth-машинкою, сумісною з LEGO®, з комп'ютера чи планшета. Безкоштовно та з відкритим кодом.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffaf0; --ink: #1d1d1f; --soft: #5b5b66; --card: #ffffff; --line: #ece4d4;
+  --red: #ff4b4b; --yellow: #ffd23f; --green: #7cc41a; --blue: #2f9bff; --orange: #ff8c1a; --purple: #8a5cff;
+  --shadow: 0 8px 0 rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141414; --ink: #f4f4f4; --soft: #b4b4bd; --card: #1f1f1f; --line: #2c2c2c; --shadow: 0 8px 0 rgba(0,0,0,.4); }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Fredoka", ui-rounded, system-ui, sans-serif; font-size: 19px; line-height: 1.55; }
+a { color: var(--blue); }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* studs row used as a decoration */
+.studs { display: flex; gap: 10px; }
+.studs i { width: 34px; height: 20px; border-radius: 8px 8px 3px 3px; display: block; }
+.studs i:nth-child(1) { background: var(--red); } .studs i:nth-child(2) { background: var(--yellow); }
+.studs i:nth-child(3) { background: var(--green); } .studs i:nth-child(4) { background: var(--blue); }
+
+/* hero */
+.hero { padding: 48px 0 30px; text-align: center; }
+.hero .studs { justify-content: center; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(42px, 8vw, 84px); line-height: 1; margin: 0 0 14px; font-weight: 700; letter-spacing: -1px; }
+.hero h1 span { color: var(--green); }
+.hero p.lead { font-size: clamp(20px, 2.6vw, 27px); color: var(--soft); max-width: 720px; margin: 0 auto 26px; }
+.btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 14px 26px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 20px;
+  box-shadow: var(--shadow); transition: transform .1s; }
+.btn:hover { transform: translateY(-3px); }
+.btn.go { background: var(--green); color: #111; } .btn.alt { background: var(--card); color: var(--ink); border: 3px solid var(--line); }
+.screen { margin: 36px auto 0; max-width: 940px; border-radius: 24px; overflow: hidden; border: 10px solid #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(-1deg); }
+
+/* demo video */
+.demo { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+.demo video { width: min(320px, 80vw); aspect-ratio: 9 / 16; border-radius: 34px; border: 10px solid #111; background: #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(2deg); display: block; }
+.demo ol { margin: 0; padding-left: 24px; font-size: 22px; } .demo li { margin: 8px 0; }
+@media (max-width: 760px) { .demo { grid-template-columns: 1fr; justify-items: center; text-align: center; } .demo ol { text-align: left; } }
+
+/* language menu */
+.lang { position: absolute; top: 14px; right: 16px; font-size: 22px; }
+.lang select { font: 600 17px "Fredoka", ui-rounded, system-ui, sans-serif; color: var(--ink); background: var(--card);
+  border: 2px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.langs { margin-top: 14px; font-size: 15px; line-height: 2; }
+.langs a { color: var(--soft); text-decoration: none; } .langs a[aria-current] { color: var(--green); font-weight: 700; }
+.hero { position: relative; }
+
+/* sections */
+section { padding: 46px 0; }
+h2 { font-size: clamp(32px, 5vw, 48px); margin: 0 0 8px; line-height: 1.1; }
+h2 .emoji { display: inline-block; transform: rotate(-8deg); }
+.sub { color: var(--soft); font-size: 21px; margin: 0 0 28px; }
+
+/* need list */
+.need { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+.tile { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 22px; box-shadow: var(--shadow); }
+.tile .big { font-size: 46px; line-height: 1; }
+.tile h3 { margin: 10px 0 4px; font-size: 24px; }
+.tile p { margin: 0; color: var(--soft); }
+
+/* steps */
+.steps { display: grid; gap: 18px; counter-reset: step; }
+.step { display: grid; grid-template-columns: 74px 1fr; gap: 18px; align-items: start; background: var(--card);
+  border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.step::before { counter-increment: step; content: counter(step); width: 74px; height: 74px; border-radius: 20px; display: grid; place-items: center;
+  font-size: 40px; font-weight: 700; color: #111; }
+.step:nth-child(1)::before { background: var(--red); } .step:nth-child(2)::before { background: var(--yellow); }
+.step:nth-child(3)::before { background: var(--green); } .step:nth-child(4)::before { background: var(--blue); }
+.step h3 { margin: 4px 0 6px; font-size: 25px; }
+.step p { margin: 0 0 8px; color: var(--soft); }
+.grownup { display: inline-block; background: var(--purple); color: #fff; font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
+pre, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+pre { background: #111; color: #e8ffd0; padding: 14px 16px; border-radius: 16px; overflow-x: auto; font-size: 16px; margin: 8px 0; position: relative; }
+pre .c { color: #8a8a8a; }
+.copy { position: absolute; right: 10px; top: 10px; background: var(--green); color: #111; border: 0; border-radius: 10px; font: 700 14px "Fredoka", sans-serif;
+  padding: 4px 10px; cursor: pointer; }
+
+/* modes */
+.mode { display: grid; grid-template-columns: 1.1fr 1fr; gap: 30px; align-items: center; margin: 0 0 46px; }
+.mode:nth-child(even) .pic { order: 2; }
+.mode .pic img { border-radius: 18px; border: 6px solid #111; box-shadow: 0 16px 40px rgba(0,0,0,.2); }
+.mode h3 { font-size: 34px; margin: 0 0 8px; }
+.mode .tag { display: inline-block; padding: 4px 14px; border-radius: 999px; color: #111; font-weight: 700; margin-bottom: 10px; }
+.mode p { color: var(--soft); margin: 0 0 10px; }
+.mode ul { margin: 0; padding-left: 22px; color: var(--soft); }
+
+/* programs */
+.progs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.prog { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.prog h3 { margin: 0 0 4px; font-size: 24px; }
+.prog p { margin: 0 0 6px; color: var(--soft); }
+
+/* keys */
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.key { display: flex; align-items: center; gap: 14px; background: var(--card); border: 3px solid var(--line); border-radius: 18px; padding: 12px 16px; }
+kbd { display: inline-grid; place-items: center; min-width: 44px; height: 44px; padding: 0 10px; border-radius: 10px; background: #fff; color: #111;
+  border: 2px solid #ccc; border-bottom-width: 5px; font: 700 18px "Fredoka", sans-serif; }
+
+/* safety */
+.safety { background: var(--red); color: #fff; border-radius: 30px; padding: 28px; display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+.safety .stop { width: 110px; height: 110px; background: #fff; color: var(--red); border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 28px; box-shadow: 0 8px 0 rgba(0,0,0,.2); }
+.safety h2 { color: #fff; } .safety p { margin: 0; font-size: 21px; }
+
+/* grown-ups */
+.grownups { background: var(--card); border: 3px solid var(--line); border-radius: 30px; padding: 30px; }
+.grownups h3 { margin: 18px 0 6px; }
+.grownups p, .grownups li { color: var(--soft); }
+
+footer { padding: 40px 0 60px; text-align: center; color: var(--soft); }
+footer .studs { justify-content: center; margin-bottom: 12px; }
+
+@media (max-width: 760px) {
+  .lang { position: static; display: block; margin-bottom: 18px; }
+  .mode { grid-template-columns: 1fr; } .mode:nth-child(even) .pic { order: 0; }
+  .safety { grid-template-columns: 1fr; text-align: center; } .safety .stop { margin: 0 auto; }
+  .step { grid-template-columns: 1fr; } .step::before { width: 60px; height: 60px; font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <!-- lang -->
+  <label class="lang">🌍 <select aria-label="Language" onchange="location.href=this.value"><option value="index.html" lang="en">English</option><option value="de.html" lang="de">Deutsch</option><option value="pt.html" lang="pt-BR">Português (Brasil)</option><option value="sk.html" lang="sk">Slovenčina</option><option value="uk.html" selected lang="uk">Українська</option><option value="bg.html" lang="bg">Български</option><option value="ca.html" lang="ca">Català</option><option value="es.html" lang="es">Español</option><option value="it.html" lang="it">Italiano</option><option value="fr.html" lang="fr">Français</option><option value="el.html" lang="el">Ελληνικά</option><option value="tlh.html" lang="tlh">tlhIngan Hol (Klingon)</option></select></label>
+  <!-- /lang -->
+  <div class="wrap">
+    <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <h1>Brick <span>Remote</span></h1>
+    <p class="lead">Керуй своєю машинкою, сумісною з LEGO®, з комп'ютера чи планшета. Кермуй, влаштовуй перегони, навчи її танцювати або намалюй їй дорогу!</p>
+    <div class="btns">
+      <a class="btn go" href="#start">🚀 Почнімо</a>
+      <a class="btn alt" href="#play">🎮 Що вона вміє?</a>
+    </div>
+    <div class="screen"><img src="img/car.jpg" alt="Застосунок Brick Remote з великим зеленим кермом, кнопками вперед і назад та швидкістю 1, 2, 3" width="1280" height="800"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap demo">
+    <video src="img/demo.mp4" poster="img/demo-poster.jpg" autoplay muted loop playsinline aria-label="Відео: вмикаємо блок, пульт знаходить його, і машинка їде"></video>
+    <div>
+      <h2><span class="emoji">🎬</span> Подивись, як це працює</h2>
+      <ol>
+        <li>Натисни кнопку на блоці. Він засвітиться.</li>
+        <li>Brick Remote знаходить його й показує кермо.</li>
+        <li>Поїхали!</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🧰</span> Що тобі потрібно</h2>
+    <p class="sub">Лише три речі.</p>
+    <div class="need">
+      <div class="tile"><div class="big">🧱</div><h3>Твій блок з моторами</h3><p>Коробка з батарейками та роз'ємами для моторів A, B, C і D. Зазвичай до неї йде застосунок <b>XP Block</b>, а в інструкції написано "Smart creative module".</p></div>
+      <div class="tile"><div class="big">💻</div><h3>Комп'ютер</h3><p>З Bluetooth: Raspberry Pi, ноутбук або настільний комп'ютер. Планшет чи телефон теж можуть бути пультом.</p></div>
+      <div class="tile"><div class="big">🧑‍🔧</div><h3>Дорослий</h3><p>Лише для першого налаштування. А далі кермуєш ти!</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2><span class="emoji">🚀</span> Почни за 4 кроки</h2>
+    <p class="sub">Кроки 1 і 2 робляться лише один раз.</p>
+    <div class="steps">
+      <div class="step"><div>
+        <h3>Встанови Brick Remote <span class="grownup">дорослий</span></h3>
+        <p>Встанови його через Python:</p>
+        <pre><button class="copy" data-done="скопійовано!">копіювати</button>pip install "brickremote[web]"</pre>
+        <p>Або завантаж код і запусти <code>./run.sh</code>, який першого разу все налаштує сам.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Збери машинку</h3>
+        <p>Підключи мотор руху до роз'єму <b>A</b>, а мотор керма до роз'єму <b>D</b>. Саме так зібрана машинка з коробки.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Увімкни блок</h3>
+        <p>Натисни кнопку живлення. Вогник почне блимати: він чекає на тебе!</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Запусти пульт</h3>
+        <pre><button class="copy" data-done="скопійовано!">копіювати</button>brickremote web</pre>
+        <p>Відкрий у браузері адресу, яку він покаже. На планшеті використай ту, що закінчується на <code>:8080</code>. Коли блок знайдеться, вогник перестане блимати, і можна їхати!</p>
+        <p>Любиш більше друкувати, ніж клацати? Просто запусти <code>brickremote</code> для версії з клавіатурою.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section id="play">
+  <div class="wrap">
+    <h2><span class="emoji">🎮</span> Чотири способи гратися</h2>
+    <p class="sub">Перемикайся між ними кнопками вгорі.</p>
+
+    <div class="mode">
+      <div class="pic"><img src="img/car.jpg" alt="Екран машинки з кермом" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--green)">🚗 Машинка</span>
+        <h3>Будь водієм</h3>
+        <p>Тримай <b>FORWARD</b>, щоб їхати, і крути кермо. Відпусти, і кермо повернеться в центр, як у справжній машині.</p>
+        <ul><li>Вибери швидкість <b>1</b> (повільно), <b>2</b> або <b>3</b> (жени!)</li><li>Або користуйся стрілками</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/ports.jpg" alt="Екран роз'ємів з двома джойстиками" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--blue)">🕹️ Роз'єми</span>
+        <h3>Керуй кожним мотором</h3>
+        <p>Збудував кран, робота чи танк? Два джойстики керують усіма чотирма моторами: один A і B, другий C і D.</p>
+        <ul><li><b>Pair</b> змушує два мотори рухатися разом, чудово для танків</li><li><b>Reverse</b> виправляє мотор, що крутиться не в той бік</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/program.jpg" alt="Екран програми з блоками" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--orange)">🧩 Програма</span>
+        <h3>Навчи її трюку</h3>
+        <p>Торкайся кольорових блоків, щоб скласти список рухів, потім натисни <b>RUN</b> і дивись, як твій витвір усе робить сам.</p>
+        <ul><li>Сині блоки рухають мотори</li><li>Помаранчеві блоки чекають і повторюють</li><li>Зелені блоки змінюють швидкість</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/path.jpg" alt="Екран маршруту із сіткою та шляхом" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--yellow)">🗺️ Маршрут</span>
+        <h3>Намалюй дорогу</h3>
+        <p>Торкайся клітинок сітки, щоб намалювати, куди їхати машинці. Кожна клітинка — пів метра. Натисни <b>GO!</b> — і вперед.</p>
+        <ul><li>Один раз виміряй свою машинку, а потім налаштуй повзунки швидкості й повороту для ідеальних маршрутів</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">💃</span> Програми, які варто спробувати</h2>
+    <p class="sub">Скопіюй одну на екран Програма й натисни RUN. Потім зміни числа й подивись, що вийде!</p>
+    <div class="progs">
+      <div class="prog"><h3>🐛 Похитування</h3><p>Вперед і назад, знову й знову.</p>
+<pre><button class="copy" data-done="скопійовано!">копіювати</button>gear 2
+repeat 4
+  a + 0.5
+  a - 0.5
+end</pre></div>
+      <div class="prog"><h3>🌀 Танець по колу</h3><p>Поверни кермо до упору й катайся колами.</p>
+<pre><button class="copy" data-done="скопійовано!">копіювати</button>repeat 3
+  d +     <span class="c"># поверни ліворуч і тримай так</span>
+  a + 2   <span class="c"># їдь 2 секунди</span>
+  stop
+  wait 0.5
+end</pre></div>
+      <div class="prog"><h3>🐢🐇 Повільно, а потім швидко</h3><p>Черепаха і заєць.</p>
+<pre><button class="copy" data-done="скопійовано!">копіювати</button>gear 1
+a + 2
+gear 3
+a + 1
+stop</pre></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">⌨️</span> Клавіші</h2>
+    <p class="sub">Для версії з клавіатурою (<code>brickremote</code>). Більшість працює і у вебверсії.</p>
+    <div class="keys">
+      <div class="key"><kbd>↑</kbd><kbd>↓</kbd> їхати вперед / назад</div>
+      <div class="key"><kbd>←</kbd><kbd>→</kbd> кермувати ліворуч / праворуч</div>
+      <div class="key"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> швидкість</div>
+      <div class="key"><kbd>Tab</kbd> наступний екран</div>
+      <div class="key"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> роз'єми A і B</div>
+      <div class="key"><kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> роз'єми C і D</div>
+      <div class="key"><kbd>пробіл</kbd> ЗУПИНИТИ все</div>
+      <div class="key"><kbd>Q</kbd> вийти</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="safety">
+      <div class="stop">STOP</div>
+      <div>
+        <h2>Безпека понад усе!</h2>
+        <p>Велика червона кнопка <b>STOP</b> (або пробіл) одразу зупиняє всі мотори. Їзди по підлозі, а не по столу, і тримай пальці подалі від коліс і шестерень, що обертаються.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="grownups">
+  <div class="wrap">
+    <div class="grownups">
+      <h2><span class="emoji">🧑‍🔧</span> Для дорослих</h2>
+      <p>Brick Remote — безкоштовна програма з відкритим кодом (ліцензія MIT). Вона працює з недорогими моторними модулями Bluetooth LE, які називаються <code>JG_JMC-xxxx</code> і зазвичай використовуються із застосунком XP Block. Працює на Linux (зокрема на Raspberry Pi), macOS і Windows.</p>
+      <h3>Більше, ніж застосунок</h3>
+      <p>Це також невелика бібліотека Python, якщо ви хочете створювати власні проєкти:</p>
+<pre><button class="copy" data-done="скопійовано!">копіювати</button>import asyncio
+from brickremote import JMCModule
+
+async def main():
+    async with JMCModule() as m:
+        await m.run(2, a=255)   <span class="c"># роз'єм A вперед на 2 секунди</span>
+
+asyncio.run(main())</pre>
+      <h3>Варто знати</h3>
+      <ul>
+        <li>Блок сам вимикається приблизно через десять хвилин без команд.</li>
+        <li>Роз'єми A і B мають спільну швидкість, так само C і D.</li>
+        <li>Вебпульт сам зупиняє мотори, якщо браузер зникає (закрита вкладка, зник Wi-Fi).</li>
+        <li>Це незалежний проєкт. Його не створювали виробники застосунку XP Block чи блоків, і він з ними не пов'язаний.</li>
+        <li>LEGO® — торговельна марка LEGO Group, яка не спонсорує, не авторизує й не схвалює цей проєкт.</li>
+      </ul>
+      <p>Код, нотатки про протокол і повний перелік команд — у <a href="https://github.com/surak/brickremote">проєкті на GitHub</a> (англійською).</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  Brick Remote · безкоштовно та з відкритим кодом · для допитливих конструкторів
+  <!-- langs -->
+  <p class="langs"><a href="index.html" lang="en">English</a> · <a href="de.html" lang="de">Deutsch</a> · <a href="pt.html" lang="pt-BR">Português (Brasil)</a> · <a href="sk.html" lang="sk">Slovenčina</a> · <a href="uk.html" lang="uk" aria-current="page">Українська</a> · <a href="bg.html" lang="bg">Български</a> · <a href="ca.html" lang="ca">Català</a> · <a href="es.html" lang="es">Español</a> · <a href="it.html" lang="it">Italiano</a> · <a href="fr.html" lang="fr">Français</a> · <a href="el.html" lang="el">Ελληνικά</a> · <a href="tlh.html" lang="tlh">tlhIngan Hol (Klingon)</a></p>
+  <!-- /langs -->
+</footer>
+
+<script>
+document.querySelectorAll(".copy").forEach(btn => btn.addEventListener("click", () => {
+  const text = [...btn.parentElement.childNodes].filter(n => n !== btn).map(n => n.textContent).join("")
+    .split("\n").map(l => l.replace(/\s+#.*$/, "")).join("\n").trim();
+  navigator.clipboard.writeText(text).then(() => { const label = btn.textContent; btn.textContent = btn.dataset.done || "copied!"; setTimeout(() => btn.textContent = label, 1500); });
+}));
+</script>
+</body>
+</html>

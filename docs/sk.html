@@ -51,11 +51,12 @@ img { max-width: 100%; height: auto; display: block; }
 .demo ol { margin: 0; padding-left: 24px; font-size: 22px; } .demo li { margin: 8px 0; }
 @media (max-width: 760px) { .demo { grid-template-columns: 1fr; justify-items: center; text-align: center; } .demo ol { text-align: left; } }
 
-/* language switch */
-.lang { position: absolute; top: 14px; right: 16px; display: flex; gap: 6px; }
-.lang a { padding: 6px 12px; border-radius: 999px; font-weight: 700; text-decoration: none; color: var(--soft);
-  background: var(--card); border: 2px solid var(--line); }
-.lang a[aria-current] { background: var(--green); border-color: var(--green); color: #111; }
+/* language menu */
+.lang { position: absolute; top: 14px; right: 16px; font-size: 22px; }
+.lang select { font: 600 17px "Fredoka", ui-rounded, system-ui, sans-serif; color: var(--ink); background: var(--card);
+  border: 2px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.langs { margin-top: 14px; font-size: 15px; line-height: 2; }
+.langs a { color: var(--soft); text-decoration: none; } .langs a[aria-current] { color: var(--green); font-weight: 700; }
 .hero { position: relative; }
 
 /* sections */
@@ -124,7 +125,7 @@ footer { padding: 40px 0 60px; text-align: center; color: var(--soft); }
 footer .studs { justify-content: center; margin-bottom: 12px; }
 
 @media (max-width: 760px) {
-  .lang { position: static; justify-content: center; margin-bottom: 18px; }
+  .lang { position: static; display: block; margin-bottom: 18px; }
   .mode { grid-template-columns: 1fr; } .mode:nth-child(even) .pic { order: 0; }
   .safety { grid-template-columns: 1fr; text-align: center; } .safety .stop { margin: 0 auto; }
   .step { grid-template-columns: 1fr; } .step::before { width: 60px; height: 60px; font-size: 32px; }
@@ -134,7 +135,9 @@ footer .studs { justify-content: center; margin-bottom: 12px; }
 <body>
 
 <header class="hero">
-  <nav class="lang" aria-label="Language"><a href="index.html" hreflang="en">EN</a><a href="de.html" hreflang="de">DE</a><a href="pt.html" hreflang="pt-BR">PT</a><a href="sk.html" hreflang="sk" aria-current="page">SK</a></nav>
+  <!-- lang -->
+  <label class="lang">🌍 <select aria-label="Language" onchange="location.href=this.value"><option value="index.html" lang="en">English</option><option value="de.html" lang="de">Deutsch</option><option value="pt.html" lang="pt-BR">Português (Brasil)</option><option value="sk.html" selected lang="sk">Slovenčina</option><option value="uk.html" lang="uk">Українська</option><option value="bg.html" lang="bg">Български</option><option value="ca.html" lang="ca">Català</option><option value="es.html" lang="es">Español</option><option value="it.html" lang="it">Italiano</option><option value="fr.html" lang="fr">Français</option><option value="el.html" lang="el">Ελληνικά</option><option value="tlh.html" lang="tlh">tlhIngan Hol (Klingon)</option></select></label>
+  <!-- /lang -->
   <div class="wrap">
     <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <h1>Brick <span>Remote</span></h1>
@@ -337,6 +340,9 @@ asyncio.run(main())</pre>
 <footer>
   <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   Brick Remote · zadarmo a open source · pre zvedavých staviteľov
+  <!-- langs -->
+  <p class="langs"><a href="index.html" lang="en">English</a> · <a href="de.html" lang="de">Deutsch</a> · <a href="pt.html" lang="pt-BR">Português (Brasil)</a> · <a href="sk.html" lang="sk" aria-current="page">Slovenčina</a> · <a href="uk.html" lang="uk">Українська</a> · <a href="bg.html" lang="bg">Български</a> · <a href="ca.html" lang="ca">Català</a> · <a href="es.html" lang="es">Español</a> · <a href="it.html" lang="it">Italiano</a> · <a href="fr.html" lang="fr">Français</a> · <a href="el.html" lang="el">Ελληνικά</a> · <a href="tlh.html" lang="tlh">tlhIngan Hol (Klingon)</a></p>
+  <!-- /langs -->
 </footer>
 
 <script>

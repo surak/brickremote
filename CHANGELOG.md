@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Website in 12 languages: English, German, Brazilian Portuguese, Slovak, Ukrainian, Bulgarian,
+  Catalan, Spanish, Italian, French, Greek and Klingon, with a language menu.
+- Say LEGO®-compatible, with a trademark notice.
+
 ## 0.4.0
 
 - Website in English, German, Brazilian Portuguese and Slovak, with a demo video.
