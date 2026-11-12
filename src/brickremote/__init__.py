@@ -5,4 +5,4 @@ from .module import JMCModule, discover, find
 from .protocol import GEARS, Status, motor_frame, parse_status, stop_frame
 
 __all__ = ["GEARS", "Car", "JMCModule", "Status", "discover", "find", "motor_frame", "parse_status", "stop_frame"]
-__version__ = "0.3.0"
+__version__ = "0.4.0"

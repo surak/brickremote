@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 
+- Website in English, German, Brazilian Portuguese and Slovak, with a demo video.
+- The README animation now also shows on PyPI.
+- Code style checked with ruff in CI.
 - `JMCModule.keep_connected()` and `JMCModule.close()`: the reconnect loop and the instant quit used
   by both apps now live in the library.
 - Settings handling moved to `brickremote.config`.
