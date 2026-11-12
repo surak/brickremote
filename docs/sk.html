@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brick Remote</title>
+<meta name="description" content="Ovládaj svoje Bluetooth autíčko z kociek počítačom alebo tabletom. Zadarmo a open source.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fffaf0; --ink: #1d1d1f; --soft: #5b5b66; --card: #ffffff; --line: #ece4d4;
+  --red: #ff4b4b; --yellow: #ffd23f; --green: #7cc41a; --blue: #2f9bff; --orange: #ff8c1a; --purple: #8a5cff;
+  --shadow: 0 8px 0 rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141414; --ink: #f4f4f4; --soft: #b4b4bd; --card: #1f1f1f; --line: #2c2c2c; --shadow: 0 8px 0 rgba(0,0,0,.4); }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Fredoka", ui-rounded, system-ui, sans-serif; font-size: 19px; line-height: 1.55; }
+a { color: var(--blue); }
+img { max-width: 100%; height: auto; display: block; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* studs row used as a decoration */
+.studs { display: flex; gap: 10px; }
+.studs i { width: 34px; height: 20px; border-radius: 8px 8px 3px 3px; display: block; }
+.studs i:nth-child(1) { background: var(--red); } .studs i:nth-child(2) { background: var(--yellow); }
+.studs i:nth-child(3) { background: var(--green); } .studs i:nth-child(4) { background: var(--blue); }
+
+/* hero */
+.hero { padding: 48px 0 30px; text-align: center; }
+.hero .studs { justify-content: center; margin-bottom: 18px; }
+.hero h1 { font-size: clamp(42px, 8vw, 84px); line-height: 1; margin: 0 0 14px; font-weight: 700; letter-spacing: -1px; }
+.hero h1 span { color: var(--green); }
+.hero p.lead { font-size: clamp(20px, 2.6vw, 27px); color: var(--soft); max-width: 720px; margin: 0 auto 26px; }
+.btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 14px 26px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 20px;
+  box-shadow: var(--shadow); transition: transform .1s; }
+.btn:hover { transform: translateY(-3px); }
+.btn.go { background: var(--green); color: #111; } .btn.alt { background: var(--card); color: var(--ink); border: 3px solid var(--line); }
+.screen { margin: 36px auto 0; max-width: 940px; border-radius: 24px; overflow: hidden; border: 10px solid #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(-1deg); }
+
+/* demo video */
+.demo { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+.demo video { width: min(320px, 80vw); aspect-ratio: 9 / 16; border-radius: 34px; border: 10px solid #111; background: #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(2deg); display: block; }
+.demo ol { margin: 0; padding-left: 24px; font-size: 22px; } .demo li { margin: 8px 0; }
+@media (max-width: 760px) { .demo { grid-template-columns: 1fr; justify-items: center; text-align: center; } .demo ol { text-align: left; } }
+
+/* language switch */
+.lang { position: absolute; top: 14px; right: 16px; display: flex; gap: 6px; }
+.lang a { padding: 6px 12px; border-radius: 999px; font-weight: 700; text-decoration: none; color: var(--soft);
+  background: var(--card); border: 2px solid var(--line); }
+.lang a[aria-current] { background: var(--green); border-color: var(--green); color: #111; }
+.hero { position: relative; }
+
+/* sections */
+section { padding: 46px 0; }
+h2 { font-size: clamp(32px, 5vw, 48px); margin: 0 0 8px; line-height: 1.1; }
+h2 .emoji { display: inline-block; transform: rotate(-8deg); }
+.sub { color: var(--soft); font-size: 21px; margin: 0 0 28px; }
+
+/* need list */
+.need { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+.tile { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 22px; box-shadow: var(--shadow); }
+.tile .big { font-size: 46px; line-height: 1; }
+.tile h3 { margin: 10px 0 4px; font-size: 24px; }
+.tile p { margin: 0; color: var(--soft); }
+
+/* steps */
+.steps { display: grid; gap: 18px; counter-reset: step; }
+.step { display: grid; grid-template-columns: 74px 1fr; gap: 18px; align-items: start; background: var(--card);
+  border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.step::before { counter-increment: step; content: counter(step); width: 74px; height: 74px; border-radius: 20px; display: grid; place-items: center;
+  font-size: 40px; font-weight: 700; color: #111; }
+.step:nth-child(1)::before { background: var(--red); } .step:nth-child(2)::before { background: var(--yellow); }
+.step:nth-child(3)::before { background: var(--green); } .step:nth-child(4)::before { background: var(--blue); }
+.step h3 { margin: 4px 0 6px; font-size: 25px; }
+.step p { margin: 0 0 8px; color: var(--soft); }
+.grownup { display: inline-block; background: var(--purple); color: #fff; font-size: 14px; font-weight: 700; padding: 2px 10px; border-radius: 999px; vertical-align: middle; margin-left: 6px; }
+pre, code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+pre { background: #111; color: #e8ffd0; padding: 14px 16px; border-radius: 16px; overflow-x: auto; font-size: 16px; margin: 8px 0; position: relative; }
+pre .c { color: #8a8a8a; }
+.copy { position: absolute; right: 10px; top: 10px; background: var(--green); color: #111; border: 0; border-radius: 10px; font: 700 14px "Fredoka", sans-serif;
+  padding: 4px 10px; cursor: pointer; }
+
+/* modes */
+.mode { display: grid; grid-template-columns: 1.1fr 1fr; gap: 30px; align-items: center; margin: 0 0 46px; }
+.mode:nth-child(even) .pic { order: 2; }
+.mode .pic img { border-radius: 18px; border: 6px solid #111; box-shadow: 0 16px 40px rgba(0,0,0,.2); }
+.mode h3 { font-size: 34px; margin: 0 0 8px; }
+.mode .tag { display: inline-block; padding: 4px 14px; border-radius: 999px; color: #111; font-weight: 700; margin-bottom: 10px; }
+.mode p { color: var(--soft); margin: 0 0 10px; }
+.mode ul { margin: 0; padding-left: 22px; color: var(--soft); }
+
+/* programs */
+.progs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.prog { background: var(--card); border: 3px solid var(--line); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+.prog h3 { margin: 0 0 4px; font-size: 24px; }
+.prog p { margin: 0 0 6px; color: var(--soft); }
+
+/* keys */
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.key { display: flex; align-items: center; gap: 14px; background: var(--card); border: 3px solid var(--line); border-radius: 18px; padding: 12px 16px; }
+kbd { display: inline-grid; place-items: center; min-width: 44px; height: 44px; padding: 0 10px; border-radius: 10px; background: #fff; color: #111;
+  border: 2px solid #ccc; border-bottom-width: 5px; font: 700 18px "Fredoka", sans-serif; }
+
+/* safety */
+.safety { background: var(--red); color: #fff; border-radius: 30px; padding: 28px; display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+.safety .stop { width: 110px; height: 110px; background: #fff; color: var(--red); border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 28px; box-shadow: 0 8px 0 rgba(0,0,0,.2); }
+.safety h2 { color: #fff; } .safety p { margin: 0; font-size: 21px; }
+
+/* grown-ups */
+.grownups { background: var(--card); border: 3px solid var(--line); border-radius: 30px; padding: 30px; }
+.grownups h3 { margin: 18px 0 6px; }
+.grownups p, .grownups li { color: var(--soft); }
+
+footer { padding: 40px 0 60px; text-align: center; color: var(--soft); }
+footer .studs { justify-content: center; margin-bottom: 12px; }
+
+@media (max-width: 760px) {
+  .lang { position: static; justify-content: center; margin-bottom: 18px; }
+  .mode { grid-template-columns: 1fr; } .mode:nth-child(even) .pic { order: 0; }
+  .safety { grid-template-columns: 1fr; text-align: center; } .safety .stop { margin: 0 auto; }
+  .step { grid-template-columns: 1fr; } .step::before { width: 60px; height: 60px; font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <nav class="lang" aria-label="Language"><a href="index.html" hreflang="en">EN</a><a href="de.html" hreflang="de">DE</a><a href="pt.html" hreflang="pt-BR">PT</a><a href="sk.html" hreflang="sk" aria-current="page">SK</a></nav>
+  <div class="wrap">
+    <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <h1>Brick <span>Remote</span></h1>
+    <p class="lead">Ovládaj svoje autíčko z kociek počítačom alebo tabletom. Riaď ho, pretekaj, nauč ho tancovať alebo mu nakresli cestu, po ktorej pôjde!</p>
+    <div class="btns">
+      <a class="btn go" href="#start">🚀 Poďme na to</a>
+      <a class="btn alt" href="#play">🎮 Čo to dokáže?</a>
+    </div>
+    <div class="screen"><img src="img/car.jpg" alt="Aplikácia Brick Remote s veľkým zeleným volantom, tlačidlami dopredu a dozadu a rýchlosťou 1, 2, 3" width="1280" height="800"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap demo">
+    <video src="img/demo.mp4" poster="img/demo-poster.jpg" autoplay muted loop playsinline aria-label="Video: kocka sa zapne, ovládač ju nájde a autíčko ide"></video>
+    <div>
+      <h2><span class="emoji">🎬</span> Pozri, ako to funguje</h2>
+      <ol>
+        <li>Stlač tlačidlo na kocke. Rozsvieti sa.</li>
+        <li>Brick Remote ju nájde a ukáže volant.</li>
+        <li>Jazdi!</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🧰</span> Čo potrebuješ</h2>
+    <p class="sub">Len tri veci.</p>
+    <div class="need">
+      <div class="tile"><div class="big">🧱</div><h3>Tvoja motorová kocka</h3><p>Batériová skrinka s konektormi pre motory A, B, C a D. Zvyčajne k nej patrí aplikácia <b>XP Block</b> a v návode je napísané „Smart creative module“.</p></div>
+      <div class="tile"><div class="big">💻</div><h3>Počítač</h3><p>S Bluetoothom: Raspberry Pi, notebook alebo stolový počítač. Ovládačom môže byť aj tablet alebo mobil.</p></div>
+      <div class="tile"><div class="big">🧑‍🔧</div><h3>Dospelého</h3><p>Len na prvé nastavenie. Potom šoféruješ ty!</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2><span class="emoji">🚀</span> Začni v 4 krokoch</h2>
+    <p class="sub">Kroky 1 a 2 robíš len raz.</p>
+    <div class="steps">
+      <div class="step"><div>
+        <h3>Stiahni Brick Remote <span class="grownup">dospelý</span></h3>
+        <p>Nainštaluj ho cez Python:</p>
+        <pre><button class="copy" data-done="skopírované!">kopírovať</button>pip install "brickremote[web]"</pre>
+        <p>Alebo si stiahni kód a použi <code>./run.sh</code>, ktorý pri prvom spustení všetko nastaví sám.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Postav si autíčko</h3>
+        <p>Zapoj motor na pohon do konektora <b>A</b> a motor na riadenie do konektora <b>D</b>. Tak je postavené autíčko z krabice.</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Zapni kocku</h3>
+        <p>Stlač vypínač. Svetielko začne blikať: čaká na teba!</p>
+      </div></div>
+      <div class="step"><div>
+        <h3>Spusti ovládač</h3>
+        <pre><button class="copy" data-done="skopírované!">kopírovať</button>brickremote web</pre>
+        <p>Otvor zobrazenú adresu vo webovom prehliadači. Na tablete použi tú, ktorá končí na <code>:8080</code>. Keď sa kocka nájde, svetielko prestane blikať a môžeš jazdiť!</p>
+        <p>Radšej píšeš ako klikáš? Spusti <code>brickremote</code> a máš verziu na klávesnicu.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section id="play">
+  <div class="wrap">
+    <h2><span class="emoji">🎮</span> Štyri spôsoby hry</h2>
+    <p class="sub">Prepínaj medzi nimi tlačidlami hore.</p>
+
+    <div class="mode">
+      <div class="pic"><img src="img/car.jpg" alt="Obrazovka auta s volantom" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--green)">🚗 Auto</span>
+        <h3>Buď šofér</h3>
+        <p>Drž <b>FORWARD</b> a autíčko ide, a otáčaj volantom. Keď pustíš, volant sa vráti do stredu, presne ako v skutočnom aute.</p>
+        <ul><li>Vyber rýchlosť <b>1</b> (pomaly), <b>2</b> alebo <b>3</b> (fičíme!)</li><li>Alebo použi šípky</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/ports.jpg" alt="Obrazovka konektorov s dvoma joystickmi" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--blue)">🕹️ Konektory</span>
+        <h3>Ovládaj každý motor</h3>
+        <p>Postavil si žeriav, robota alebo tank? Dva joysticky ovládajú všetky štyri motory, jeden A a B, druhý C a D.</p>
+        <ul><li><b>Pair</b> spojí dva motory, aby išli spolu, super na tanky</li><li><b>Reverse</b> opraví motor, ktorý sa točí naopak</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/program.jpg" alt="Obrazovka programu s blokmi" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--orange)">🧩 Program</span>
+        <h3>Nauč ho trik</h3>
+        <p>Ťukaj na farebné bloky a poskladaj zoznam pohybov, potom stlač <b>RUN</b> a pozeraj, ako to tvoje dielo urobí samo.</p>
+        <ul><li>Modré bloky hýbu motormi</li><li>Oranžové bloky čakajú a opakujú</li><li>Zelené bloky menia rýchlosť</li></ul>
+      </div>
+    </div>
+
+    <div class="mode">
+      <div class="pic"><img src="img/path.jpg" alt="Obrazovka trasy s mriežkou a cestou" loading="lazy" width="1280" height="800"></div>
+      <div>
+        <span class="tag" style="background:var(--yellow)">🗺️ Trasa</span>
+        <h3>Nakresli cestu</h3>
+        <p>Ťukaj na štvorčeky v mriežke a nakresli, kam má autíčko ísť. Každý štvorček je pol metra. Stlač <b>GO!</b> a ide sa.</p>
+        <ul><li>Raz si autíčko zmeraj a nastav posúvače rýchlosti a otáčania, aby trasy vyšli presne</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">💃</span> Programy na vyskúšanie</h2>
+    <p class="sub">Skopíruj jeden do obrazovky Program a stlač RUN. Potom zmeň čísla a uvidíš, čo sa stane!</p>
+    <div class="progs">
+      <div class="prog"><h3>🐛 Vrtenie</h3><p>Dopredu a dozadu, znova a znova.</p>
+<pre><button class="copy" data-done="skopírované!">kopírovať</button>gear 2
+repeat 4
+  a + 0.5
+  a - 0.5
+end</pre></div>
+      <div class="prog"><h3>🌀 Točivý tanec</h3><p>Zatoč naplno a jazdi dokola.</p>
+<pre><button class="copy" data-done="skopírované!">kopírovať</button>repeat 3
+  d +     <span class="c"># zatoč doľava a nechaj tak</span>
+  a + 2   <span class="c"># jazdi 2 sekundy</span>
+  stop
+  wait 0.5
+end</pre></div>
+      <div class="prog"><h3>🐢🐇 Pomaly, potom rýchlo</h3><p>Korytnačka a zajac.</p>
+<pre><button class="copy" data-done="skopírované!">kopírovať</button>gear 1
+a + 2
+gear 3
+a + 1
+stop</pre></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">⌨️</span> Klávesy</h2>
+    <p class="sub">Pre verziu na klávesnicu (<code>brickremote</code>). Väčšina funguje aj vo webovej verzii.</p>
+    <div class="keys">
+      <div class="key"><kbd>↑</kbd><kbd>↓</kbd> jazdiť dopredu / dozadu</div>
+      <div class="key"><kbd>←</kbd><kbd>→</kbd> zatáčať doľava / doprava</div>
+      <div class="key"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> rýchlosť</div>
+      <div class="key"><kbd>Tab</kbd> ďalšia obrazovka</div>
+      <div class="key"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> konektory A a B</div>
+      <div class="key"><kbd>I</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> konektory C a D</div>
+      <div class="key"><kbd>medzerník</kbd> ZASTAVIŤ všetko</div>
+      <div class="key"><kbd>Q</kbd> skončiť</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="safety">
+      <div class="stop">STOP</div>
+      <div>
+        <h2>Bezpečnosť na prvom mieste!</h2>
+        <p>Veľké červené tlačidlo <b>STOP</b> (alebo medzerník) hneď zastaví všetky motory. Jazdi po zemi, nie po stole, a nestrkaj prsty do točiacich sa kolies a ozubených koliesok.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="grownups">
+  <div class="wrap">
+    <div class="grownups">
+      <h2><span class="emoji">🧑‍🔧</span> Pre dospelých</h2>
+      <p>Brick Remote je bezplatný softvér s otvoreným kódom (licencia MIT). Funguje s lacnými motorovými modulmi Bluetooth LE, ktoré sa hlásia ako <code>JG_JMC-xxxx</code> a bežne sa používajú s mobilnou aplikáciou XP Block. Beží na Linuxe (aj na Raspberry Pi), macOS a Windows.</p>
+      <h3>Viac než aplikácia</h3>
+      <p>Je to aj malá knižnica pre Python, ak chcete stavať vlastné projekty:</p>
+<pre><button class="copy" data-done="skopírované!">kopírovať</button>import asyncio
+from brickremote import JMCModule
+
+async def main():
+    async with JMCModule() as m:
+        await m.run(2, a=255)   <span class="c"># konektor A dopredu na 2 sekundy</span>
+
+asyncio.run(main())</pre>
+      <h3>Dobré vedieť</h3>
+      <ul>
+        <li>Kocka sa sama vypne asi po desiatich minútach bez príkazov.</li>
+        <li>Konektory A a B majú spoločnú rýchlosť, rovnako C a D.</li>
+        <li>Webový ovládač sám zastaví motory, keď prehliadač zmizne (zatvorená karta, výpadok Wi-Fi).</li>
+        <li>Toto je nezávislý projekt. Nevytvorili ho výrobcovia aplikácie XP Block ani kociek a nie je s nimi nijako spojený.</li>
+      </ul>
+      <p>Kód, poznámky k protokolu a úplný zoznam príkazov nájdete v <a href="https://github.com/surak/brickremote">projekte na GitHube</a> (po anglicky).</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  Brick Remote · zadarmo a open source · pre zvedavých staviteľov
+</footer>
+
+<script>
+document.querySelectorAll(".copy").forEach(btn => btn.addEventListener("click", () => {
+  const text = [...btn.parentElement.childNodes].filter(n => n !== btn).map(n => n.textContent).join("")
+    .split("\n").map(l => l.replace(/\s+#.*$/, "")).join("\n").trim();
+  navigator.clipboard.writeText(text).then(() => { const label = btn.textContent; btn.textContent = btn.dataset.done || "copied!"; setTimeout(() => btn.textContent = label, 1500); });
+}));
+</script>
+</body>
+</html>
