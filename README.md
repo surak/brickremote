@@ -4,7 +4,7 @@
 
 <img src="https://raw.githubusercontent.com/surak/brickremote/main/docs/img/demo.gif" alt="Switching on the brick, the web remote finds it, then the car drives" width="300">
 
-Python library for the cheap Lego-compatible Bluetooth LE motor bricks that advertise as
+Python library for the cheap LEGO®-compatible Bluetooth LE motor bricks that advertise as
 `JG_JMC-xxxx` and are normally driven by the **XP Block** phone app ("Smart creative module",
 four motor ports A–D). Works anywhere [bleak](https://github.com/hbldh/bleak) does: Linux
 (incl. Raspberry Pi), macOS and Windows.
@@ -170,3 +170,5 @@ after about ten minutes without commands.
 ## License
 
 MIT
+
+LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize or endorse this project.

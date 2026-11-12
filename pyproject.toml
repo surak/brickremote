@@ -5,14 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "brickremote"
 dynamic = ["version"]
-description = "Drive Lego-compatible Bluetooth motor bricks (JG_JMC / XP Block \"Smart creative module\") from a computer"
+description = "Drive LEGO-compatible Bluetooth motor bricks (JG_JMC / XP Block \"Smart creative module\") from a computer"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Alexandre Strube", email = "surak@surak.eti.br" }]
 requires-python = ">=3.10"
 dependencies = ["bleak>=0.22"]
-keywords = ["bluetooth", "ble", "building blocks", "motor", "remote control", "xp block", "jg_jmc", "smart creative module", "kids"]
+keywords = ["bluetooth", "ble", "lego compatible", "building blocks", "motor", "remote control", "xp block", "jg_jmc", "smart creative module", "kids"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Education",

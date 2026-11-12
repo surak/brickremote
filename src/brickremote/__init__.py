@@ -1,4 +1,4 @@
-"""Control JG_JMC-xxxx Bluetooth LE motor modules (Lego-compatible, "XP Block" app)."""
+"""Control JG_JMC-xxxx Bluetooth LE motor modules (LEGO-compatible, "XP Block" app)."""
 
 from .car import Car
 from .module import JMCModule, discover, find
