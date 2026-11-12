@@ -2,6 +2,8 @@
 
 **Website for kids and parents: https://surak.github.io/brickremote/**
 
+<img src="docs/img/demo.gif" alt="Switching on the brick, the web remote finds it, then the car drives" width="300">
+
 Python library for the cheap Lego-compatible Bluetooth LE motor bricks that advertise as
 `JG_JMC-xxxx` and are normally driven by the **XP Block** phone app ("Smart creative module",
 four motor ports A–D). Works anywhere [bleak](https://github.com/hbldh/bleak) does: Linux

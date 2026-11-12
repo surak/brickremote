@@ -44,6 +44,13 @@ img { max-width: 100%; height: auto; display: block; }
 .screen { margin: 36px auto 0; max-width: 940px; border-radius: 24px; overflow: hidden; border: 10px solid #111;
   box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(-1deg); }
 
+/* demo video */
+.demo { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+.demo video { width: min(320px, 80vw); aspect-ratio: 9 / 16; border-radius: 34px; border: 10px solid #111; background: #111;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25); transform: rotate(2deg); display: block; }
+.demo ol { margin: 0; padding-left: 24px; font-size: 22px; } .demo li { margin: 8px 0; }
+@media (max-width: 760px) { .demo { grid-template-columns: 1fr; justify-items: center; text-align: center; } .demo ol { text-align: left; } }
+
 /* sections */
 section { padding: 46px 0; }
 h2 { font-size: clamp(32px, 5vw, 48px); margin: 0 0 8px; line-height: 1.1; }
@@ -130,6 +137,20 @@ footer .studs { justify-content: center; margin-bottom: 12px; }
     <div class="screen"><img src="img/car.jpg" alt="The Brick Remote app with a big green steering wheel, forward and back buttons, and speed 1, 2, 3" width="1280" height="800"></div>
   </div>
 </header>
+
+<section>
+  <div class="wrap demo">
+    <video src="img/demo.mp4" poster="img/demo-poster.jpg" autoplay muted loop playsinline aria-label="Video: switching on the brick, the remote finds it, then the car drives"></video>
+    <div>
+      <h2><span class="emoji">🎬</span> Watch it work</h2>
+      <ol>
+        <li>Press the button on your brick. It lights up.</li>
+        <li>Brick Remote finds it and shows the steering wheel.</li>
+        <li>Drive!</li>
+      </ol>
+    </div>
+  </div>
+</section>
 
 <section>
   <div class="wrap">
