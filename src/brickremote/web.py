@@ -18,10 +18,10 @@ from importlib import resources
 from aiohttp import WSMsgType, web
 
 from .car import Car
+from .config import EXAMPLE_PATH, EXAMPLE_PROGRAM, load_config, save_config
 from .module import JMCModule
 from .protocol import PORTS
 from .script import Calibration, ScriptError, parse_path, parse_program, run_path, run_program
-from .config import EXAMPLE_PATH, EXAMPLE_PROGRAM, load_config, save_config
 
 log = logging.getLogger(__name__)
 

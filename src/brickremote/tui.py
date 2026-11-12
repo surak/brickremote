@@ -11,11 +11,11 @@ from __future__ import annotations
 import asyncio
 import curses
 import functools
+import logging
 import math
 import os
 import subprocess
 import tempfile
-import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -61,7 +61,8 @@ def init_colours() -> None:
     orange = 208 if curses.COLORS >= 256 else curses.COLOR_YELLOW
     green = 112 if curses.COLORS >= 256 else curses.COLOR_GREEN
     pairs = {
-        GREEN: (green, bg), ON_GREEN: (curses.COLOR_BLACK, green), DIM: (8 if curses.COLORS > 8 else curses.COLOR_WHITE, bg),
+        GREEN: (green, bg), ON_GREEN: (curses.COLOR_BLACK, green),
+        DIM: (8 if curses.COLORS > 8 else curses.COLOR_WHITE, bg),
         YELLOW: (curses.COLOR_YELLOW, bg), RED: (curses.COLOR_RED, bg), BLUE: (curses.COLOR_BLUE, bg),
         ON_YELLOW: (curses.COLOR_BLACK, curses.COLOR_YELLOW), ON_RED: (curses.COLOR_WHITE, curses.COLOR_RED),
         WHITE: (curses.COLOR_WHITE, bg), ORANGE: (orange, bg),
@@ -217,7 +218,8 @@ class App:
             self.awaiting_invert = False
             if ch in PORT_KEYS:
                 self.module.inverted ^= {ch}
-                self.say(f"Port {ch.upper()} now turns {'the other way round' if ch in self.module.inverted else 'the normal way'}.")
+                way = "the other way round" if ch in self.module.inverted else "the normal way"
+                self.say(f"Port {ch.upper()} now turns {way}.")
                 self.persist()
             return
         if k == 9:  # Tab
@@ -243,7 +245,10 @@ class App:
             self.link = (self.link + 1) % len(LINKS)
             pair = LINKS[self.link]
             self.module.links = {pair[0]: pair[1]} if pair else {}
-            self.say("Pair off." if not pair else f"Paired: {pair[1].upper()} now does whatever {pair[0].upper()} does.")
+            if pair:
+                self.say(f"Paired: {pair[1].upper()} now does whatever {pair[0].upper()} does.")
+            else:
+                self.say("Pair off.")
         elif ch == "r":
             self.awaiting_invert = True
             self.say("Reverse which port? Press a, b, c or d.")
@@ -356,14 +361,15 @@ class App:
             x += 2
         self.put(0, x + 1, "BRICK  REMOTE", g)
         x = 26
-        for i, (name, icon) in enumerate(zip(TABS, TAB_ICONS)):
+        for i, (name, icon) in enumerate(zip(TABS, TAB_ICONS, strict=True)):
             attr = curses.color_pair(ON_GREEN) | curses.A_BOLD if i == self.tab else curses.color_pair(DIM)
             x = self.pill(0, x, f"{icon} {name}", attr, action=lambda i=i: self.select_tab(i))
         # battery + connection, right aligned
         bat = self.module.battery
         level = 0 if bat is None else round(bat / 20)
         colour = GREEN if (bat or 0) > 50 else YELLOW if (bat or 0) > 20 else RED
-        text = f"{'●' if self.module.is_connected else '○'} ▕{'█' * level}{'░' * (5 - level)}▏{bat if bat is not None else '?'}%"
+        dot = "●" if self.module.is_connected else "○"
+        text = f"{dot} ▕{'█' * level}{'░' * (5 - level)}▏{bat if bat is not None else '?'}%"
         self.put(0, max(x + 1, w - len(text) - 2), text, curses.color_pair(colour) | curses.A_BOLD)
 
     def draw_gears(self, y: int, x: int) -> None:
@@ -470,7 +476,7 @@ class App:
                   ("PAIR " + ("+".join(link).upper() if link else "off"), ON_YELLOW if link else DIM),
                   ("REVERSED " + (",".join(sorted(self.module.inverted)).upper() or "-"),
                    ON_YELLOW if self.module.inverted else DIM)]
-        for (text, colour), k in zip(status, "hpr"):
+        for (text, colour), k in zip(status, "hpr", strict=True):
             x = self.pill(y, x, text, curses.color_pair(colour) | curses.A_BOLD, action=lambda k=k: self.key(ord(k)))
         bar = curses.color_pair(ON_GREEN) | curses.A_BOLD
         self.put(h - 1, 0, " " * (w - 1), bar)

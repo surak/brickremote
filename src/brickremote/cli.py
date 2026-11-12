@@ -47,7 +47,7 @@ async def _program(args) -> None:
     try:
         steps = script.parse_program(args.file.read())
     except script.ScriptError as exc:
-        raise SystemExit(f"error: {exc}")
+        raise SystemExit(f"error: {exc}") from None
     async with _connect(args) as module:
         await _wait_battery(module)
         await script.run_program(module, steps, gear=args.gear)
@@ -57,7 +57,7 @@ async def _path(args) -> None:
     try:
         moves = script.parse_path(args.file.read())
     except script.ScriptError as exc:
-        raise SystemExit(f"error: {exc}")
+        raise SystemExit(f"error: {exc}") from None
     cal = script.Calibration(args.mps, args.dps)
     async with _connect(args) as module:
         await _wait_battery(module)
